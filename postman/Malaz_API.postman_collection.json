@@ -1,0 +1,1980 @@
+{
+    "info":  {
+                 "name":  "Malaz API - Full v1 (AR/EN Header + Seeded Data)",
+                 "description":  "Full API collection for /api/v1 with success and error tests. Switch language from collection variable `lang` (en/ar) through header `X-Lang`.",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "base_url",
+                         "value":  "http://127.0.0.1:8000"
+                     },
+                     {
+                         "key":  "lang",
+                         "value":  "en"
+                     },
+                     {
+                         "key":  "admin_email",
+                         "value":  "admin@example.com"
+                     },
+                     {
+                         "key":  "admin_password",
+                         "value":  "secret"
+                     },
+                     {
+                         "key":  "admin_token",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "owner_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "project_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "project_image_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "home_image_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "contact_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "platform_link_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "sample_image_path",
+                         "value":  "postman/assets/sample.png"
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "00 - Auth",
+                     "item":  [
+                                  {
+                                      "name":  "Login Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/auth/login"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Token exists\u0027, function () { pm.expect(json.data.token).to.be.a(\u0027string\u0027).and.not.empty; });",
+                                                                                    "pm.collectionVariables.set(\u0027admin_token\u0027, json.data.token);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Login Error - Invalid Credentials",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"wrong\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/auth/login"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });",
+                                                                                    "pm.test(\u0027Errors object exists\u0027, function () { pm.expect(json.errors).to.be.an(\u0027object\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Me Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/me"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Has email\u0027, function () { pm.expect(json.data.email).to.be.a(\u0027string\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Me Error - Unauthenticated",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/me"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Unauth status\u0027, function () { pm.expect(pm.response.code).to.be.oneOf([401, 500]); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "01 - Public",
+                     "item":  [
+                                  {
+                                      "name":  "Get Home Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/home"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Localized fields exist\u0027, function () { pm.expect(json.data).to.have.property(\u0027headline_text\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Owners Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/owners?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Items is array\u0027, function () { pm.expect(json.data.items).to.be.an(\u0027array\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Projects Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/projects?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Items is array\u0027, function () { pm.expect(json.data.items).to.be.an(\u0027array\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Project Detail Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/projects/{{project_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Has id\u0027, function () { pm.expect(json.data.id).to.exist; });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Project Detail Error - Not Found",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/projects/999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Platforms Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/platforms"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Data is array\u0027, function () { pm.expect(json.data).to.be.an(\u0027array\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Contact Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name\": \"API Client\",\n  \"email\": \"api.client@example.com\",\n  \"phone\": \"01000000000\",\n  \"whatsapp\": \"01000000000\",\n  \"note\": \"Need call back\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/contact"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027contact_id\u0027, json.data.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Contact Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name\": \"No Email\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/contact"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });",
+                                                                                    "pm.test(\u0027Email error exists\u0027, function () { pm.expect(json.errors).to.have.property(\u0027email\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "02 - Admin Owners",
+                     "item":  [
+                                  {
+                                      "name":  "List Owners Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/owners?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Owner Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/owners/{{owner_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Owner Error - Not Found",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/owners/999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Owner Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "formdata",
+                                                                   "formdata":  [
+                                                                                    {
+                                                                                        "key":  "name_ar",
+                                                                                        "value":  "\\u0645\\u0627\\u0644\\u0643 \\u0627\\u062e\\u062a\\u0628\\u0627\\u0631",
+                                                                                        "type":  "text"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "name_en",
+                                                                                        "value":  "Owner Test",
+                                                                                        "type":  "text"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "title_ar",
+                                                                                        "value":  "\\u0645\\u062f\\u064a\\u0631",
+                                                                                        "type":  "text"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "title_en",
+                                                                                        "value":  "Director",
+                                                                                        "type":  "text"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "bio_ar",
+                                                                                        "value":  "\\u0646\\u0628\\u0630\\u0629 \\u0627\\u062e\\u062a\\u0628\\u0627\\u0631",
+                                                                                        "type":  "text"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "bio_en",
+                                                                                        "value":  "Seeded by API collection",
+                                                                                        "type":  "text"
+                                                                                    }
+                                                                                ]
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/owners"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027owner_id\u0027, json.data.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Owner Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name_en\": \"Missing Arabic name\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/owners"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Owner Success",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name_ar\": \"\\u0645\\u0627\\u0644\\u0643 \\u0645\\u062d\\u062f\\u062b\",\n  \"name_en\": \"Owner Updated\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/owners/{{owner_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Owner Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/owners/{{owner_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "03 - Admin Projects",
+                     "item":  [
+                                  {
+                                      "name":  "List Projects Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/projects?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Project Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Project Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name_ar\": \"\\u0645\\u0634\\u0631\\u0648\\u0639 \\u062a\\u062c\\u0631\\u064a\\u0628\\u064a\",\n  \"name_en\": \"Demo Project\",\n  \"description_ar\": \"\\u0648\\u0635\\u0641 \\u062a\\u062c\\u0631\\u064a\\u0628\\u064a\",\n  \"description_en\": \"Demo description\",\n  \"location_ar\": \"\\u0627\\u0644\\u0631\\u064a\\u0627\\u0636\",\n  \"location_en\": \"Riyadh\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027project_id\u0027, json.data.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Project Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name_en\": \"Only one field\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Project Success",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"name_ar\": \"\\u0645\\u0634\\u0631\\u0648\\u0639 \\u0645\\u062d\\u062f\\u062b\",\n  \"name_en\": \"Demo Project Updated\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Project Gallery Add Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "formdata",
+                                                                   "formdata":  [
+                                                                                    {
+                                                                                        "key":  "image",
+                                                                                        "type":  "file",
+                                                                                        "src":  "{{sample_image_path}}"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "sort_order",
+                                                                                        "value":  "1",
+                                                                                        "type":  "text"
+                                                                                    }
+                                                                                ]
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027project_image_id\u0027, json.data.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Project Gallery Add Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sort_order\": 0\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Project Gallery Update Success",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sort_order\": 2\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery/{{project_image_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Project Gallery Update Error - Not Found Pair",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sort_order\": 3\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/999999/gallery/{{project_image_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Project Gallery Delete Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery/{{project_image_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Project Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/projects/{{project_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "04 - Admin Home",
+                     "item":  [
+                                  {
+                                      "name":  "Show Home Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/home"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Home Success",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"headline_text_ar\": \"\\u0639\\u0646\\u0648\\u0627\\u0646 \\u0627\\u0644\\u0628\\u0637\\u0648\\u0644\\u0629\",\n  \"headline_text_en\": \"Homepage headline\",\n  \"body_text_ar\": \"\\u0645\\u062d\\u062a\\u0648\\u0649 \\u062a\\u062c\\u0631\\u064a\\u0628\\u064a\",\n  \"body_text_en\": \"Homepage body\",\n  \"youtube_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/home"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Home Error - Invalid URL",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"youtube_url\": \"not-url\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/home"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Add Hero Image Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "formdata",
+                                                                   "formdata":  [
+                                                                                    {
+                                                                                        "key":  "image",
+                                                                                        "type":  "file",
+                                                                                        "src":  "{{sample_image_path}}"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "sort_order",
+                                                                                        "value":  "2",
+                                                                                        "type":  "text"
+                                                                                    }
+                                                                                ]
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/home/hero-gallery"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027home_image_id\u0027, json.data.id);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Add Hero Image Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sort_order\": 0\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/home/hero-gallery"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Hero Image Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/home/hero-gallery/{{home_image_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Hero Image Error - Not Found",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/home/hero-gallery/999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "05 - Admin Platforms",
+                     "item":  [
+                                  {
+                                      "name":  "List Platform Links Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/platform-links"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Upsert Platform Success",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"url\": \"https://instagram.com/malaz-updated\",\n  \"is_active\": true\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/platform-links/instagram"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Upsert Platform Error - Invalid Key",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"url\": \"https://example.com\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/platform-links/invalid"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Toggle Platform Success",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/platform-links/{{platform_link_id}}/toggle"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Toggle Platform Error - Not Found",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/platform-links/999999/toggle"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "06 - Admin Contact Messages",
+                     "item":  [
+                                  {
+                                      "name":  "List Contact Messages Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages?per_page=10"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Contact Message Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Contact Message Error - Not Found",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Contact Status Success",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"status\": \"read\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}/status"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Contact Status Error - Validation",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"status\": \"invalid-status\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}/status"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Contact Message Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Contact Message Error - Not Found",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/contact-messages/999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 }
+             ]
+}
