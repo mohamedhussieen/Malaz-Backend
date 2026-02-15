@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\AuthController;
+use App\Http\Controllers\Api\V1\Admin\BlogController;
 use App\Http\Controllers\Api\V1\Admin\ContactMessageController;
 use App\Http\Controllers\Api\V1\Admin\HomeController;
 use App\Http\Controllers\Api\V1\Admin\OwnerController;
@@ -17,6 +18,7 @@ Route::prefix('admin')->group(function () {
 
         Route::apiResource('owners', OwnerController::class);
         Route::apiResource('projects', ProjectController::class);
+        Route::apiResource('blogs', BlogController::class);
         Route::post('/projects/{project}/gallery', [ProjectController::class, 'storeGallery']);
         Route::patch('/projects/{project}/gallery/{image}', [ProjectController::class, 'updateGallery']);
         Route::delete('/projects/{project}/gallery/{image}', [ProjectController::class, 'destroyGallery']);

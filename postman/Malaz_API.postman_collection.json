@@ -52,6 +52,14 @@
                      {
                          "key":  "sample_image_path",
                          "value":  "postman/assets/sample.png"
+                     },
+                     {
+                         "key":  "blog_id",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "blog_slug",
+                         "value":  "blog-post-1"
                      }
                  ],
     "item":  [
@@ -423,6 +431,87 @@
                                                                                     "const json = pm.response.json();",
                                                                                     "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });",
                                                                                     "pm.test(\u0027Email error exists\u0027, function () { pm.expect(json.errors).to.have.property(\u0027email\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Blogs Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/blogs?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Items is array\u0027, function () { pm.expect(json.data.items).to.be.an(\u0027array\u0027); });",
+                                                                                    "if (json.data.items.length \u003e 0) { pm.collectionVariables.set(\u0027blog_slug\u0027, json.data.items[0].slug); pm.collectionVariables.set(\u0027blog_id\u0027, json.data.items[0].id); }"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Blog Detail Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/blogs/{{blog_slug}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Slug matches\u0027, function () { pm.expect(json.data.slug).to.eql(pm.collectionVariables.get(\u0027blog_slug\u0027)); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Get Blog Detail Error - Not Found",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/blogs/not-found-slug-999999"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
                                                                                 ]
                                                                    }
                                                     }
@@ -1969,6 +2058,256 @@
                                                                                     "pm.test(\u0027Status 404\u0027, function () { pm.response.to.have.status(404); });",
                                                                                     "const json = pm.response.json();",
                                                                                     "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 null,
+                 {
+                     "name":  "07 - Admin Blogs",
+                     "item":  [
+                                  {
+                                      "name":  "List Blogs Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs?per_page=10\u0026page=1"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.test(\u0027Items is array\u0027, function () { pm.expect(json.data.items).to.be.an(\u0027array\u0027); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Blog Success",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"title_ar\": \"blog ar\",\n  \"title_en\": \"Demo Blog Post\",\n  \"excerpt_ar\": \"excerpt ar\",\n  \"excerpt_en\": \"Demo excerpt\",\n  \"content_ar\": \"content ar\",\n  \"content_en\": \"Demo blog content\",\n  \"is_published\": true\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 201\u0027, function () { pm.response.to.have.status(201); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027blog_id\u0027, json.data.id);",
+                                                                                    "pm.collectionVariables.set(\u0027blog_slug\u0027, json.data.slug);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Create Blog Error - Validation",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"title_ar\": \"\",\n  \"title_en\": \"\",\n  \"content_ar\": \"\",\n  \"content_en\": \"\"\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 422\u0027, function () { pm.response.to.have.status(422); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=false\u0027, function () { pm.expect(json.status).to.eql(false); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Show Blog Success",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Update Blog Success",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"title_ar\": \"updated ar\",\n  \"title_en\": \"Updated Blog Post\",\n  \"excerpt_ar\": \"updated excerpt ar\",\n  \"excerpt_en\": \"Updated excerpt\",\n  \"content_ar\": \"updated content ar\",\n  \"content_en\": \"Updated content\",\n  \"is_published\": true\n}"
+                                                               },
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });",
+                                                                                    "pm.collectionVariables.set(\u0027blog_slug\u0027, json.data.slug);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Delete Blog Success",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "auth":  {
+                                                                   "type":  "bearer",
+                                                                   "bearer":  [
+                                                                                  {
+                                                                                      "key":  "token",
+                                                                                      "value":  "{{admin_token}}",
+                                                                                      "type":  "string"
+                                                                                  }
+                                                                              ]
+                                                               },
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "X-Lang",
+                                                                         "value":  "{{lang}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status 200\u0027, function () { pm.response.to.have.status(200); });",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027API status=true\u0027, function () { pm.expect(json.status).to.eql(true); });"
                                                                                 ]
                                                                    }
                                                     }
