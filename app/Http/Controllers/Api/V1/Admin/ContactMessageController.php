@@ -14,11 +14,39 @@ class ContactMessageController extends BaseApiController
     {
         $perPage = (int) $request->get('per_page', 10);
         $perPage = min($perPage, 50);
+        $search = trim((string) $request->get('search', ''));
+        $type = strtolower((string) $request->get('type', ''));
 
-        $paginator = ContactMessage::query()
+        $query = ContactMessage::query()
             ->select(['id', 'name', 'email', 'phone', 'whatsapp', 'note', 'status', 'created_at'])
-            ->orderByDesc('created_at')
-            ->paginate($perPage);
+            ->orderByDesc('created_at');
+
+        if ($search !== '') {
+            if ($type === 'phone') {
+                $query->where(function ($builder) use ($search) {
+                    $builder
+                        ->where('phone', 'like', "%{$search}%")
+                        ->orWhere('whatsapp', 'like', "%{$search}%");
+                });
+            } elseif ($type === 'name') {
+                $query->where('name', 'like', "%{$search}%");
+            } elseif ($type === 'email') {
+                $query->where('email', 'like', "%{$search}%");
+            } elseif ($type === 'msg') {
+                $query->where('note', 'like', "%{$search}%");
+            } else {
+                $query->where(function ($builder) use ($search) {
+                    $builder
+                        ->where('phone', 'like', "%{$search}%")
+                        ->orWhere('whatsapp', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('note', 'like', "%{$search}%");
+                });
+            }
+        }
+
+        $paginator = $query->paginate($perPage);
 
         $items = ContactMessageResource::collection($paginator->getCollection())->resolve();
 

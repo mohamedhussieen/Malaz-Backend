@@ -53,6 +53,8 @@ class BlogController extends BaseApiController
 
     public function show(Blog $blog)
     {
+        $blog->load('paragraphs');
+
         return $this->successResponse(
             (new BlogDetailResource($blog))->resolve(),
             'تم الحصول على البيانات بنجاح',

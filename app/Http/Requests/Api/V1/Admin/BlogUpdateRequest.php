@@ -18,8 +18,8 @@ class BlogUpdateRequest extends ApiFormRequest
             'title_en' => ['sometimes', 'required', 'string', 'max:255'],
             'excerpt_ar' => ['sometimes', 'nullable', 'string'],
             'excerpt_en' => ['sometimes', 'nullable', 'string'],
-            'content_ar' => ['sometimes', 'required', 'string'],
-            'content_en' => ['sometimes', 'required', 'string'],
+            'content_ar' => ['sometimes', 'nullable', 'string'],
+            'content_en' => ['sometimes', 'nullable', 'string'],
             'slug' => [
                 'sometimes',
                 'nullable',
@@ -31,6 +31,12 @@ class BlogUpdateRequest extends ApiFormRequest
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['sometimes', 'nullable', 'date'],
+            'paragraphs' => ['sometimes', 'array', 'min:1'],
+            'paragraphs.*.header_ar' => ['nullable', 'string', 'max:255'],
+            'paragraphs.*.header_en' => ['nullable', 'string', 'max:255'],
+            'paragraphs.*.content_ar' => ['required_with:paragraphs', 'string'],
+            'paragraphs.*.content_en' => ['required_with:paragraphs', 'string'],
+            'paragraphs.*.sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

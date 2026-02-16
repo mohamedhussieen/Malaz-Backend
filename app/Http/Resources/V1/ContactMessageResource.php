@@ -15,6 +15,7 @@ class ContactMessageResource extends JsonResource
             'phone' => $this->phone,
             'whatsapp' => $this->whatsapp,
             'note' => $this->note,
+            'msg' => $this->note,
             'status' => $this->status,
             'created_at' => $this->created_at?->toIso8601String(),
         ];

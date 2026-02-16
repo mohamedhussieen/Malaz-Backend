@@ -51,6 +51,7 @@ class BlogService
         return Cache::remember($cacheKey, 3600, function () use ($slug) {
             $blog = Blog::query()
                 ->select($this->selectColumns())
+                ->with('paragraphs')
                 ->where('slug', $slug)
                 ->where('is_published', true)
                 ->where(function ($query) {
@@ -70,7 +71,12 @@ class BlogService
 
     public function create(array $data, ?UploadedFile $cover, MediaService $media): Blog
     {
+        $paragraphs = $data['paragraphs'] ?? [];
+        unset($data['paragraphs']);
+
+        $data = $this->hydrateContentFromParagraphs($data, $paragraphs);
         $data = $this->hydrateLegacyFields($data);
+        $data = $this->ensureBaseContent($data);
         $data = $this->preparePublishing($data);
         $data['slug'] = $this->prepareSlug($data['slug'] ?? null, $data['title_en'] ?? $data['title'] ?? 'blog-post');
 
@@ -79,14 +85,20 @@ class BlogService
         }
 
         $blog = Blog::create($data);
+        $this->syncParagraphs($blog, $paragraphs);
         CacheVersion::bump('blogs');
 
-        return $blog;
+        return $blog->load('paragraphs');
     }
 
     public function update(Blog $blog, array $data, ?UploadedFile $cover, MediaService $media): Blog
     {
+        $paragraphs = $data['paragraphs'] ?? null;
+        unset($data['paragraphs']);
+
+        $data = $this->hydrateContentFromParagraphs($data, $paragraphs);
         $data = $this->hydrateLegacyFields($data);
+        $data = $this->ensureBaseContent($data, false);
         $data = $this->preparePublishing($data);
 
         if (array_key_exists('slug', $data)) {
@@ -102,9 +114,12 @@ class BlogService
         }
 
         $blog->update($data);
+        if ($paragraphs !== null) {
+            $this->syncParagraphs($blog, $paragraphs);
+        }
         CacheVersion::bump('blogs');
 
-        return $blog;
+        return $blog->load('paragraphs');
     }
 
     public function delete(Blog $blog, MediaService $media): void
@@ -153,6 +168,33 @@ class BlogService
         return $data;
     }
 
+    private function hydrateContentFromParagraphs(array $data, ?array $paragraphs): array
+    {
+        if (!is_array($paragraphs) || $paragraphs === []) {
+            return $data;
+        }
+
+        if (empty($data['content_en'])) {
+            $data['content_en'] = collect($paragraphs)
+                ->pluck('content_en')
+                ->filter(fn ($value) => is_string($value) && $value !== '')
+                ->implode("\n\n");
+        }
+
+        if (empty($data['content_ar'])) {
+            $data['content_ar'] = collect($paragraphs)
+                ->pluck('content_ar')
+                ->filter(fn ($value) => is_string($value) && $value !== '')
+                ->implode("\n\n");
+        }
+
+        if (empty($data['content'])) {
+            $data['content'] = $data['content_en'] ?? $data['content_ar'] ?? '';
+        }
+
+        return $data;
+    }
+
     private function preparePublishing(array $data): array
     {
         if (($data['is_published'] ?? null) === true && empty($data['published_at'])) {
@@ -161,6 +203,31 @@ class BlogService
 
         if (($data['is_published'] ?? null) === false && !array_key_exists('published_at', $data)) {
             $data['published_at'] = null;
+        }
+
+        return $data;
+    }
+
+    private function ensureBaseContent(array $data, bool $forCreate = true): array
+    {
+        if (array_key_exists('content', $data) && $data['content'] !== null) {
+            return $data;
+        }
+
+        if (!empty($data['content_en'])) {
+            $data['content'] = $data['content_en'];
+
+            return $data;
+        }
+
+        if (!empty($data['content_ar'])) {
+            $data['content'] = $data['content_ar'];
+
+            return $data;
+        }
+
+        if ($forCreate) {
+            $data['content'] = '';
         }
 
         return $data;
@@ -193,5 +260,31 @@ class BlogService
         }
 
         return $query->exists();
+    }
+
+    private function syncParagraphs(Blog $blog, array $paragraphs): void
+    {
+        $rows = collect($paragraphs)
+            ->map(function (array $paragraph, int $index): array {
+                $contentEn = $paragraph['content_en'] ?? null;
+                $contentAr = $paragraph['content_ar'] ?? null;
+
+                return [
+                    'header' => $paragraph['header_en'] ?? $paragraph['header_ar'] ?? null,
+                    'header_ar' => $paragraph['header_ar'] ?? null,
+                    'header_en' => $paragraph['header_en'] ?? null,
+                    'content' => $contentEn ?? $contentAr ?? '',
+                    'content_ar' => $contentAr,
+                    'content_en' => $contentEn,
+                    'sort_order' => $paragraph['sort_order'] ?? $index,
+                ];
+            })
+            ->values()
+            ->all();
+
+        $blog->paragraphs()->delete();
+        if ($rows !== []) {
+            $blog->paragraphs()->createMany($rows);
+        }
     }
 }

@@ -11,9 +11,30 @@ use Illuminate\Support\Facades\Cache;
 
 class ProjectService
 {
-    public function paginate(int $perPage, int $page): LengthAwarePaginator
+    public function paginate(int $perPage, int $page, ?string $search = null): LengthAwarePaginator
     {
         $perPage = min($perPage, 50);
+        $search = is_string($search) ? trim($search) : '';
+
+        if ($search !== '') {
+            return Project::query()
+                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path'])
+                ->where(function ($query) use ($search) {
+                    $query
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('name_ar', 'like', "%{$search}%")
+                        ->orWhere('name_en', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%")
+                        ->orWhere('location_ar', 'like', "%{$search}%")
+                        ->orWhere('location_en', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('description_ar', 'like', "%{$search}%")
+                        ->orWhere('description_en', 'like', "%{$search}%");
+                })
+                ->orderByDesc('created_at')
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
         $version = CacheVersion::get('projects');
         $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}";
 

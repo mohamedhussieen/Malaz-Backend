@@ -17,8 +17,9 @@ class OwnerController extends BaseApiController
     {
         $perPage = (int) $request->get('per_page', 10);
         $page = (int) $request->get('page', 1);
+        $search = $request->get('search');
 
-        $paginator = $this->ownerService->paginate($perPage, $page);
+        $paginator = $this->ownerService->paginate($perPage, $page, is_string($search) ? $search : null);
         $items = OwnerResource::collection($paginator->getCollection())->resolve();
 
         return $this->successResponse(

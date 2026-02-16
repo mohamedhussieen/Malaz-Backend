@@ -10,9 +10,38 @@ use Illuminate\Support\Facades\Cache;
 
 class OwnerService
 {
-    public function paginate(int $perPage, int $page): LengthAwarePaginator
+    public function paginate(int $perPage, int $page, ?string $search = null): LengthAwarePaginator
     {
         $perPage = min($perPage, 50);
+        $search = is_string($search) ? trim($search) : '';
+
+        if ($search !== '') {
+            return Owner::query()
+                ->select([
+                    'id',
+                    'name',
+                    'name_ar',
+                    'name_en',
+                    'title',
+                    'title_ar',
+                    'title_en',
+                    'bio',
+                    'bio_ar',
+                    'bio_en',
+                    'avatar_path',
+                ])
+                ->where(function ($query) use ($search) {
+                    $query
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('name_ar', 'like', "%{$search}%")
+                        ->orWhere('name_en', 'like', "%{$search}%")
+                        ->orWhere('title', 'like', "%{$search}%")
+                        ->orWhere('title_ar', 'like', "%{$search}%")
+                        ->orWhere('title_en', 'like', "%{$search}%");
+                })
+                ->paginate($perPage, ['*'], 'page', $page);
+        }
+
         $version = CacheVersion::get('owners');
         $cacheKey = "public:owners:v{$version}:p{$page}:pp{$perPage}";
 

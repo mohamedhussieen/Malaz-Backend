@@ -11,9 +11,10 @@ class ContactStoreRequest extends ApiFormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['required', 'string', 'max:50'],
             'whatsapp' => ['nullable', 'string', 'max:50'],
             'note' => ['nullable', 'string'],
+            'msg' => ['nullable', 'string'],
         ];
     }
 }

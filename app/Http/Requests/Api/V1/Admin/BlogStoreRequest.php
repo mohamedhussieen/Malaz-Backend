@@ -14,12 +14,18 @@ class BlogStoreRequest extends ApiFormRequest
             'title_en' => ['required', 'string', 'max:255'],
             'excerpt_ar' => ['nullable', 'string'],
             'excerpt_en' => ['nullable', 'string'],
-            'content_ar' => ['required', 'string'],
-            'content_en' => ['required', 'string'],
+            'content_ar' => ['nullable', 'string'],
+            'content_en' => ['nullable', 'string'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash', Rule::unique('blogs', 'slug')],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
+            'paragraphs' => ['sometimes', 'array', 'min:1'],
+            'paragraphs.*.header_ar' => ['nullable', 'string', 'max:255'],
+            'paragraphs.*.header_en' => ['nullable', 'string', 'max:255'],
+            'paragraphs.*.content_ar' => ['required_with:paragraphs', 'string'],
+            'paragraphs.*.content_en' => ['required_with:paragraphs', 'string'],
+            'paragraphs.*.sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\ContactMessageStatus;
 use App\Enums\PlatformLinkKey;
 use App\Models\Blog;
+use App\Models\BlogParagraph;
 use App\Models\ContactMessage;
 use App\Models\HomeContent;
 use App\Models\HomeImage;
@@ -45,6 +46,7 @@ class DatabaseSeeder extends Seeder
             $this->seedPlatformLinks($now);
             $this->seedContactMessages($now, $faker);
             $this->seedBlogs($now, $faker);
+            $this->seedBlogParagraphs($now, $faker);
         });
     }
 
@@ -54,6 +56,7 @@ class DatabaseSeeder extends Seeder
             'personal_access_tokens',
             'project_images',
             'home_images',
+            'blog_paragraphs',
             'blogs',
             'projects',
             'owners',
@@ -70,7 +73,7 @@ class DatabaseSeeder extends Seeder
             foreach ($tables as $table) {
                 DB::table($table)->delete();
             }
-            DB::statement("DELETE FROM sqlite_sequence WHERE name IN ('users','owners','projects','project_images','home_contents','home_images','platform_links','contact_messages','blogs','personal_access_tokens');");
+            DB::statement("DELETE FROM sqlite_sequence WHERE name IN ('users','owners','projects','project_images','home_contents','home_images','platform_links','contact_messages','blogs','blog_paragraphs','personal_access_tokens');");
             DB::statement('PRAGMA foreign_keys = ON;');
 
             return;
@@ -341,6 +344,36 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => $now,
             ];
         });
+    }
+
+    private function seedBlogParagraphs($now, $faker): void
+    {
+        $rows = [];
+        for ($blogId = 1; $blogId <= self::ROWS_PER_TABLE; $blogId++) {
+            for ($order = 1; $order <= 2; $order++) {
+                $rows[] = [
+                    'blog_id' => $blogId,
+                    'header' => "Section {$order}",
+                    'header_ar' => "قسم {$order}",
+                    'header_en' => "Section {$order}",
+                    'content' => $faker->paragraph(4),
+                    'content_ar' => "محتوى الفقرة {$order} للمقال {$blogId}",
+                    'content_en' => $faker->paragraph(4),
+                    'sort_order' => $order,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            if (count($rows) >= self::CHUNK_SIZE) {
+                BlogParagraph::query()->insert($rows);
+                $rows = [];
+            }
+        }
+
+        if ($rows !== []) {
+            BlogParagraph::query()->insert($rows);
+        }
     }
 
     private function bulkInsert(string $modelClass, callable $rowGenerator): void

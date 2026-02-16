@@ -28,8 +28,9 @@ class ProjectController extends BaseApiController
     {
         $perPage = (int) $request->get('per_page', 10);
         $page = (int) $request->get('page', 1);
+        $search = $request->get('search');
 
-        $paginator = $this->projectService->paginate($perPage, $page);
+        $paginator = $this->projectService->paginate($perPage, $page, is_string($search) ? $search : null);
         $items = ProjectListResource::collection($paginator->getCollection())->resolve();
 
         return $this->successResponse(

@@ -1,0 +1,401 @@
+{
+  "info": {
+    "name": "Malaz API - Blog Paragraphs + Search + Contact (Manual)",
+    "description": "Manual QA collection for the newly added features: Blog paragraphs CRUD flow, owners/projects search, and contact-us phone + typed admin search.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "lang", "value": "en" },
+    { "key": "admin_email", "value": "admin@example.com" },
+    { "key": "admin_password", "value": "secret" },
+    { "key": "admin_token", "value": "" },
+    { "key": "owner_search", "value": "Owner 1" },
+    { "key": "project_search", "value": "Project 1" },
+    { "key": "contact_id", "value": "" },
+    { "key": "blog_id", "value": "" },
+    { "key": "blog_slug", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 - Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('admin_token', json.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/admin/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Contact Public",
+      "item": [
+        {
+          "name": "Create Contact (phone + msg)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Manual QA User\",\n  \"email\": \"manual.qa@example.com\",\n  \"phone\": \"01012345678\",\n  \"whatsapp\": \"01012345678\",\n  \"msg\": \"Need a project proposal and pricing details\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/contact"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('contact_id', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Contact Error (missing phone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Missing Phone\",\n  \"email\": \"missing.phone@example.com\",\n  \"msg\": \"This should fail\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/contact"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Contact Admin Search",
+      "item": [
+        {
+          "name": "List Contacts",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/admin/contact-messages?per_page=10&page=1"
+          }
+        },
+        {
+          "name": "Search Contacts by Phone",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/contact-messages?type=phone&search=010123"
+          }
+        },
+        {
+          "name": "Search Contacts by Name",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/contact-messages?type=name&search=Manual"
+          }
+        },
+        {
+          "name": "Search Contacts by Email",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/contact-messages?type=email&search=manual.qa@example.com"
+          }
+        },
+        {
+          "name": "Search Contacts by Msg",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/contact-messages?type=msg&search=proposal"
+          }
+        },
+        {
+          "name": "Show Contact by ID",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Owners Search",
+      "item": [
+        {
+          "name": "Public Owners Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/owners?per_page=10&page=1&search={{owner_search}}"
+          }
+        },
+        {
+          "name": "Admin Owners Search",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/owners?per_page=10&page=1&search={{owner_search}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Projects Search",
+      "item": [
+        {
+          "name": "Public Projects Search",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/projects?per_page=10&page=1&search={{project_search}}"
+          }
+        },
+        {
+          "name": "Admin Projects Search",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/projects?per_page=10&page=1&search={{project_search}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Blogs With Paragraphs",
+      "item": [
+        {
+          "name": "Create Blog (2 paragraphs)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title_ar\": \"عنوان مقال تجريبي\",\n  \"title_en\": \"Manual API Blog\",\n  \"excerpt_ar\": \"ملخص عربي\",\n  \"excerpt_en\": \"English excerpt\",\n  \"is_published\": true,\n  \"paragraphs\": [\n    {\n      \"header_ar\": \"مقدمة\",\n      \"header_en\": \"Introduction\",\n      \"content_ar\": \"الفقرة الأولى عربي\",\n      \"content_en\": \"First paragraph in English\",\n      \"sort_order\": 1\n    },\n    {\n      \"header_ar\": \"تفاصيل\",\n      \"header_en\": \"Details\",\n      \"content_ar\": \"الفقرة الثانية عربي\",\n      \"content_en\": \"Second paragraph in English\",\n      \"sort_order\": 2\n    }\n  ]\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('blog_id', json.data.id);",
+                  "pm.collectionVariables.set('blog_slug', json.data.slug);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Blog Without Paragraphs (optional)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title_ar\": \"بدون فقرات\",\n  \"title_en\": \"Without Paragraphs\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs"
+          }
+        },
+        {
+          "name": "Admin Show Blog",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+          }
+        },
+        {
+          "name": "Admin List Blogs",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs?per_page=10&page=1"
+          }
+        },
+        {
+          "name": "Update Blog (replace paragraphs)",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title_ar\": \"عنوان محدث\",\n  \"title_en\": \"Updated Manual Blog\",\n  \"is_published\": true,\n  \"paragraphs\": [\n    {\n      \"header_ar\": \"قسم واحد\",\n      \"header_en\": \"Single Section\",\n      \"content_ar\": \"تم الاستبدال بالكامل\",\n      \"content_en\": \"Paragraph set fully replaced\",\n      \"sort_order\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+          }
+        },
+        {
+          "name": "Public List Blogs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/blogs?per_page=10&page=1"
+          }
+        },
+        {
+          "name": "Public Blog Detail by Slug",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Lang", "value": "{{lang}}" }
+            ],
+            "url": "{{base_url}}/api/v1/blogs/{{blog_slug}}"
+          }
+        },
+        {
+          "name": "Delete Blog",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}

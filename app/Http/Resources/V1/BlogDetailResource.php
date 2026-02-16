@@ -18,6 +18,7 @@ class BlogDetailResource extends JsonResource
             'slug' => $this->slug,
             'excerpt' => $this->localized('excerpt'),
             'content' => $this->localized('content'),
+            'paragraphs' => BlogParagraphResource::collection($this->whenLoaded('paragraphs')),
             'cover_url' => MediaUrl::toUrl($this->cover_path),
             'is_published' => (bool) $this->is_published,
             'published_at' => $this->published_at?->toISOString(),
