@@ -353,6 +353,12 @@
         },
         { "name": "Admin Platform Link Toggle", "request": { "method": "PATCH", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/platform-links/{{platform_link_id}}/toggle" } }
       ]
+    },
+    {
+      "name": "08 Dashboard Admin",
+      "item": [
+        { "name": "Admin Dashboard Counts", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/dashboard/counts" } }
+      ]
     }
   ]
 }

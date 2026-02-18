@@ -9,29 +9,47 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class ProjectService
 {
+    private ?array $projectColumns = null;
+    private ?array $projectImageColumns = null;
+
     public function paginate(int $perPage, int $page, ?string $search = null): LengthAwarePaginator
     {
         $perPage = min($perPage, 50);
         $search = is_string($search) ? trim($search) : '';
+        $selectColumns = $this->projectListSelectColumns();
+        $searchColumns = $this->availableProjectColumns([
+            'name',
+            'name_ar',
+            'name_en',
+            'location',
+            'location_ar',
+            'location_en',
+            'description',
+            'description_ar',
+            'description_en',
+        ]);
 
         if ($search !== '') {
-            return Project::query()
-                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
-                ->where(function ($query) use ($search) {
-                    $query
-                        ->where('name', 'like', "%{$search}%")
-                        ->orWhere('name_ar', 'like', "%{$search}%")
-                        ->orWhere('name_en', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%")
-                        ->orWhere('location_ar', 'like', "%{$search}%")
-                        ->orWhere('location_en', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%")
-                        ->orWhere('description_ar', 'like', "%{$search}%")
-                        ->orWhere('description_en', 'like', "%{$search}%");
-                })
+            $query = Project::query()->select($selectColumns);
+
+            if ($searchColumns !== []) {
+                $query->where(function ($builder) use ($search, $searchColumns) {
+                    foreach ($searchColumns as $index => $column) {
+                        if ($index === 0) {
+                            $builder->where($column, 'like', "%{$search}%");
+                            continue;
+                        }
+
+                        $builder->orWhere($column, 'like', "%{$search}%");
+                    }
+                });
+            }
+
+            return $query
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $page);
         }
@@ -39,9 +57,9 @@ class ProjectService
         $version = CacheVersion::get('projects');
         $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page) {
+        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns) {
             return Project::query()
-                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
+                ->select($selectColumns)
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $page);
         });
@@ -49,21 +67,23 @@ class ProjectService
 
     public function findWithImages(int $id): Project
     {
+        $selectColumns = $this->availableProjectColumns([
+            'id',
+            'name',
+            'name_ar',
+            'name_en',
+            'description',
+            'description_ar',
+            'description_en',
+            'location',
+            'location_ar',
+            'location_en',
+            'cover_path',
+            'is_featured_home',
+        ]);
+
         return Project::query()
-            ->select([
-                'id',
-                'name',
-                'name_ar',
-                'name_en',
-                'description',
-                'description_ar',
-                'description_en',
-                'location',
-                'location_ar',
-                'location_en',
-                'cover_path',
-                'is_featured_home',
-            ])
+            ->select($selectColumns)
             ->with(['images:id,project_id,name,path,sort_order'])
             ->findOrFail($id);
     }
@@ -76,6 +96,7 @@ class ProjectService
             $data['cover_path'] = $media->store($cover, 'projects/covers');
         }
 
+        $data = $this->filterDataByProjectColumns($data);
         $project = Project::create($data);
         CacheVersion::bump('projects');
 
@@ -90,6 +111,7 @@ class ProjectService
             $data['cover_path'] = $media->update($cover, 'projects/covers', $project->cover_path);
         }
 
+        $data = $this->filterDataByProjectColumns($data);
         $project->update($data);
         CacheVersion::bump('projects');
 
@@ -116,11 +138,12 @@ class ProjectService
     ): ProjectImage
     {
         $path = $media->store($file, 'projects/galleries');
-        $image = $project->images()->create([
+        $imageData = $this->filterDataByProjectImageColumns([
             'name' => $name,
             'path' => $path,
             'sort_order' => $sortOrder,
         ]);
+        $image = $project->images()->create($imageData);
 
         CacheVersion::bump('projects');
 
@@ -139,6 +162,7 @@ class ProjectService
             $updates['path'] = $media->update($file, 'projects/galleries', $image->path);
         }
 
+        $updates = $this->filterDataByProjectImageColumns($updates);
         if ($updates !== []) {
             $image->update($updates);
             CacheVersion::bump('projects');
@@ -149,13 +173,18 @@ class ProjectService
 
     public function featuredForHome(int $limit = 8): Collection
     {
+        if (!$this->hasProjectColumn('is_featured_home')) {
+            return new Collection();
+        }
+
         $limit = max(1, min($limit, 30));
         $version = CacheVersion::get('projects');
         $cacheKey = "public:home:featured-projects:v{$version}:l{$limit}";
+        $selectColumns = $this->projectListSelectColumns();
 
-        return Cache::remember($cacheKey, 3600, function () use ($limit) {
+        return Cache::remember($cacheKey, 3600, function () use ($limit, $selectColumns) {
             return Project::query()
-                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
+                ->select($selectColumns)
                 ->where('is_featured_home', true)
                 ->orderByDesc('updated_at')
                 ->limit($limit)
@@ -185,5 +214,75 @@ class ProjectService
         }
 
         return $data;
+    }
+
+    private function projectListSelectColumns(): array
+    {
+        return $this->availableProjectColumns([
+            'id',
+            'name',
+            'name_ar',
+            'name_en',
+            'location',
+            'location_ar',
+            'location_en',
+            'cover_path',
+            'is_featured_home',
+        ]);
+    }
+
+    private function availableProjectColumns(array $columns): array
+    {
+        $availableColumns = $this->projectColumns();
+
+        return array_values(array_filter($columns, static fn (string $column): bool => isset($availableColumns[$column])));
+    }
+
+    private function hasProjectColumn(string $column): bool
+    {
+        $availableColumns = $this->projectColumns();
+
+        return isset($availableColumns[$column]);
+    }
+
+    private function projectColumns(): array
+    {
+        if ($this->projectColumns !== null) {
+            return $this->projectColumns;
+        }
+
+        $this->projectColumns = array_fill_keys(Schema::getColumnListing('projects'), true);
+
+        return $this->projectColumns;
+    }
+
+    private function projectImageColumns(): array
+    {
+        if ($this->projectImageColumns !== null) {
+            return $this->projectImageColumns;
+        }
+
+        $this->projectImageColumns = array_fill_keys(Schema::getColumnListing('project_images'), true);
+
+        return $this->projectImageColumns;
+    }
+
+    private function filterDataByProjectColumns(array $data): array
+    {
+        return $this->filterDataByKnownColumns($data, $this->projectColumns());
+    }
+
+    private function filterDataByProjectImageColumns(array $data): array
+    {
+        return $this->filterDataByKnownColumns($data, $this->projectImageColumns());
+    }
+
+    private function filterDataByKnownColumns(array $data, array $columns): array
+    {
+        return array_filter(
+            $data,
+            static fn (mixed $value, string $key): bool => isset($columns[$key]),
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 }

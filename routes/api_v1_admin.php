@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Admin\AuthController;
 use App\Http\Controllers\Api\V1\Admin\BlogController;
 use App\Http\Controllers\Api\V1\Admin\ContactMessageController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\HomeController;
 use App\Http\Controllers\Api\V1\Admin\OwnerController;
 use App\Http\Controllers\Api\V1\Admin\PlatformLinkController;
@@ -15,6 +16,7 @@ Route::prefix('admin')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::get('/dashboard/counts', [DashboardController::class, 'counts']);
 
         Route::apiResource('owners', OwnerController::class);
         Route::apiResource('projects', ProjectController::class);
