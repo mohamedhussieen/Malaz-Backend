@@ -9,6 +9,7 @@ class HomeImage extends Model
 {
     protected $fillable = [
         'home_content_id',
+        'name',
         'path',
         'sort_order',
     ];

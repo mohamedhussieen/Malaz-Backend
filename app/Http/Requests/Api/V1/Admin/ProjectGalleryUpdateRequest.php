@@ -10,6 +10,7 @@ class ProjectGalleryUpdateRequest extends ApiFormRequest
     {
         return [
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'name' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

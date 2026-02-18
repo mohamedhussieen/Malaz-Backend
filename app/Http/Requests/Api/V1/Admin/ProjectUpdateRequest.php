@@ -15,6 +15,7 @@ class ProjectUpdateRequest extends ApiFormRequest
             'description_en' => ['sometimes', 'required', 'string'],
             'location_ar' => ['sometimes', 'required', 'string', 'max:255'],
             'location_en' => ['sometimes', 'required', 'string', 'max:255'],
+            'is_featured_home' => ['sometimes', 'boolean'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }

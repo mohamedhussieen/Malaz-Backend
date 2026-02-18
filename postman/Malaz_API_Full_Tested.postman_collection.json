@@ -1,0 +1,358 @@
+﻿{
+  "info": {
+    "name": "Malaz API v1 - Full Tested",
+    "description": "Complete Postman collection for all public and admin APIs in /api/v1. Includes sample payloads, auth chaining, id capture tests, and new home/project gallery fields.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('HTTP status is success', function () {",
+          "  pm.expect(pm.response.code).to.be.within(200, 299);",
+          "});",
+          "pm.test('Response is JSON', function () {",
+          "  pm.response.to.be.json;",
+          "});",
+          "const json = pm.response.json();",
+          "pm.test('Envelope has status', function () {",
+          "  pm.expect(json).to.have.property('status');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "admin_email", "value": "admin@example.com" },
+    { "key": "admin_password", "value": "secret" },
+    { "key": "admin_token", "value": "" },
+    { "key": "owner_id", "value": "1" },
+    { "key": "project_id", "value": "1" },
+    { "key": "project_image_id", "value": "1" },
+    { "key": "home_image_id", "value": "1" },
+    { "key": "blog_id", "value": "1" },
+    { "key": "blog_slug", "value": "sample-blog" },
+    { "key": "contact_id", "value": "1" },
+    { "key": "platform_link_id", "value": "1" },
+    { "key": "sample_image_path", "value": "C:/tmp/sample.jpg" }
+  ],
+  "item": [
+    {
+      "name": "00 Auth",
+      "description": "Admin authentication and session checks.",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/auth/login",
+            "description": "Login and capture bearer token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.data && j.data.token) pm.collectionVariables.set('admin_token', j.data.token);",
+                  "pm.test('Token captured', function () {",
+                  "  pm.expect(pm.collectionVariables.get('admin_token')).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Me",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/me"
+          }
+        },
+        {
+          "name": "Admin Logout",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{admin_token}}", "type": "string" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 Public",
+      "description": "Public website APIs.",
+      "item": [
+        { "name": "Public Home", "request": { "method": "GET", "url": "{{base_url}}/api/v1/home" } },
+        { "name": "Public Owners", "request": { "method": "GET", "url": "{{base_url}}/api/v1/owners?per_page=10&page=1&search=test" } },
+        { "name": "Public Projects", "request": { "method": "GET", "url": "{{base_url}}/api/v1/projects?per_page=10&page=1&search=test" } },
+        { "name": "Public Project Show", "request": { "method": "GET", "url": "{{base_url}}/api/v1/projects/{{project_id}}" } },
+        { "name": "Public Blogs", "request": { "method": "GET", "url": "{{base_url}}/api/v1/blogs?per_page=10&page=1" } },
+        { "name": "Public Blog Show", "request": { "method": "GET", "url": "{{base_url}}/api/v1/blogs/{{blog_slug}}" } },
+        { "name": "Public Platforms", "request": { "method": "GET", "url": "{{base_url}}/api/v1/platforms" } },
+        {
+          "name": "Public Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman QA\",\n  \"email\": \"qa@example.com\",\n  \"phone\": \"01012345678\",\n  \"whatsapp\": \"01012345678\",\n  \"msg\": \"Need proposal\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/contact"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.data && j.data.id) pm.collectionVariables.set('contact_id', j.data.id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Contact Admin",
+      "item": [
+        { "name": "Admin Contacts List", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/contact-messages?per_page=10&page=1" } },
+        { "name": "Admin Contacts Show", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}" } },
+        {
+          "name": "Admin Contacts Status",
+          "request": {
+            "method": "PATCH",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"read\"\n}" },
+            "url": "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}/status"
+          }
+        },
+        { "name": "Admin Contacts Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/contact-messages/{{contact_id}}" } }
+      ]
+    },
+    {
+      "name": "03 Owners Admin",
+      "item": [
+        { "name": "Admin Owners List", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/owners?per_page=10&page=1&search=test" } },
+        {
+          "name": "Admin Owner Create",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name_ar\": \"Owner Ar\",\n  \"name_en\": \"Owner\",\n  \"title_ar\": \"Title Ar\",\n  \"title_en\": \"Title\"\n}" },
+            "url": "{{base_url}}/api/v1/admin/owners"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data && j.data.id) pm.collectionVariables.set('owner_id', j.data.id);"] } }]
+        },
+        { "name": "Admin Owner Show", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/owners/{{owner_id}}" } },
+        {
+          "name": "Admin Owner Update",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name_ar\": \"Owner Ar Updated\",\n  \"name_en\": \"Owner Updated\"\n}" },
+            "url": "{{base_url}}/api/v1/admin/owners/{{owner_id}}"
+          }
+        },
+        { "name": "Admin Owner Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/owners/{{owner_id}}" } }
+      ]
+    },
+    {
+      "name": "04 Projects Admin",
+      "description": "Includes new `is_featured_home` project flag and gallery image name/sort support.",
+      "item": [
+        { "name": "Admin Projects List", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/projects?per_page=10&page=1&search=test" } },
+        {
+          "name": "Admin Project Create",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"Project Ar\",\n  \"name_en\": \"Project\",\n  \"description_ar\": \"Desc ar\",\n  \"description_en\": \"Desc\",\n  \"location_ar\": \"Cairo\",\n  \"location_en\": \"Cairo\",\n  \"is_featured_home\": true\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/projects"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data && j.data.id) pm.collectionVariables.set('project_id', j.data.id);"] } }]
+        },
+        { "name": "Admin Project Show", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}" } },
+        {
+          "name": "Admin Project Update",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"Project Ar Updated\",\n  \"name_en\": \"Project Updated\",\n  \"description_ar\": \"Desc ar updated\",\n  \"description_en\": \"Desc updated\",\n  \"location_ar\": \"Riyadh\",\n  \"location_en\": \"Riyadh\",\n  \"is_featured_home\": true\n}"
+            },
+            "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}"
+          }
+        },
+        {
+          "name": "Admin Project Gallery Add",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "{{sample_image_path}}" },
+                { "key": "name", "type": "text", "value": "Main render" },
+                { "key": "sort_order", "type": "text", "value": "1" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data && j.data.id) pm.collectionVariables.set('project_image_id', j.data.id);"] } }]
+        },
+        {
+          "name": "Admin Project Gallery Update",
+          "request": {
+            "method": "PATCH",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "type": "text", "value": "Main render updated" },
+                { "key": "sort_order", "type": "text", "value": "2" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery/{{project_image_id}}"
+          }
+        },
+        { "name": "Admin Project Gallery Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}/gallery/{{project_image_id}}" } },
+        { "name": "Admin Project Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/projects/{{project_id}}" } }
+      ]
+    },
+    {
+      "name": "05 Blogs Admin",
+      "item": [
+        { "name": "Admin Blogs List", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/blogs?per_page=10&page=1" } },
+        {
+          "name": "Admin Blog Create",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"Blog Ar\",\n  \"title_en\": \"Blog\",\n  \"is_published\": true,\n  \"paragraphs\": [\n    {\n      \"header_ar\": \"Intro Ar\",\n      \"header_en\": \"Intro\",\n      \"content_ar\": \"Paragraph ar\",\n      \"content_en\": \"Paragraph\",\n      \"sort_order\": 1\n    }\n  ]\n}" },
+            "url": "{{base_url}}/api/v1/admin/blogs"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data) { if (j.data.id) pm.collectionVariables.set('blog_id', j.data.id); if (j.data.slug) pm.collectionVariables.set('blog_slug', j.data.slug); }"] } }]
+        },
+        { "name": "Admin Blog Show", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}" } },
+        {
+          "name": "Admin Blog Update",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"Blog Ar Updated\",\n  \"title_en\": \"Blog Updated\",\n  \"is_published\": true,\n  \"paragraphs\": [\n    {\n      \"header_ar\": \"Section Ar\",\n      \"header_en\": \"Section\",\n      \"content_ar\": \"Updated paragraph ar\",\n      \"content_en\": \"Updated paragraph\",\n      \"sort_order\": 1\n    }\n  ]\n}" },
+            "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}"
+          }
+        },
+        { "name": "Admin Blog Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/blogs/{{blog_id}}" } }
+      ]
+    },
+    {
+      "name": "06 Home Admin",
+      "description": "Includes hero gallery create/update/delete with image name + sort order.",
+      "item": [
+        { "name": "Admin Home Show", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/home" } },
+        {
+          "name": "Admin Home Update",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"headline_text_ar\": \"Headline ar\",\n  \"headline_text_en\": \"Headline\",\n  \"body_text_ar\": \"Body ar\",\n  \"body_text_en\": \"Body\",\n  \"youtube_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"\n}" },
+            "url": "{{base_url}}/api/v1/admin/home"
+          }
+        },
+        {
+          "name": "Admin Home Hero Add",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "{{sample_image_path}}" },
+                { "key": "name", "type": "text", "value": "Skyline Hero" },
+                { "key": "sort_order", "type": "text", "value": "1" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/home/hero-gallery"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data && j.data.id) pm.collectionVariables.set('home_image_id', j.data.id);"] } }]
+        },
+        {
+          "name": "Admin Home Hero Update",
+          "request": {
+            "method": "PATCH",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "type": "text", "value": "Skyline Hero Updated" },
+                { "key": "sort_order", "type": "text", "value": "2" }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/admin/home/hero-gallery/{{home_image_id}}"
+          }
+        },
+        { "name": "Admin Home Hero Delete", "request": { "method": "DELETE", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/home/hero-gallery/{{home_image_id}}" } }
+      ]
+    },
+    {
+      "name": "07 Platform Links Admin",
+      "item": [
+        { "name": "Admin Platform Links List", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/platform-links" } },
+        {
+          "name": "Admin Platform Link Upsert",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"url\": \"https://facebook.com/malaz\",\n  \"is_active\": true\n}" },
+            "url": "{{base_url}}/api/v1/admin/platform-links/facebook"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const j = pm.response.json(); if (j.data && j.data.id) pm.collectionVariables.set('platform_link_id', j.data.id);"] } }]
+        },
+        { "name": "Admin Platform Link Toggle", "request": { "method": "PATCH", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }, "url": "{{base_url}}/api/v1/admin/platform-links/{{platform_link_id}}/toggle" } }
+      ]
+    }
+  ]
+}

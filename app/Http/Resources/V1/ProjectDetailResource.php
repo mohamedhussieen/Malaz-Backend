@@ -18,6 +18,15 @@ class ProjectDetailResource extends JsonResource
             'description' => $this->localized('description'),
             'location' => $this->localized('location'),
             'cover_url' => MediaUrl::toUrl($this->cover_path),
+            'is_featured_home' => (bool) $this->is_featured_home,
+            'gallery' => $this->images
+                ? $this->images->map(fn ($image) => [
+                    'id' => $image->id,
+                    'name' => $image->name,
+                    'sort_order' => $image->sort_order,
+                    'url' => MediaUrl::toUrl($image->path),
+                ])->values()->all()
+                : [],
             'gallery_urls' => $this->images
                 ? $this->images->map(fn ($image) => MediaUrl::toUrl($image->path))->values()->all()
                 : [],

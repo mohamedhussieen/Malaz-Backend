@@ -9,6 +9,7 @@ class ProjectImage extends Model
 {
     protected $fillable = [
         'project_id',
+        'name',
         'path',
         'sort_order',
     ];

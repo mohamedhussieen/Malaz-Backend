@@ -102,6 +102,7 @@ class ProjectController extends BaseApiController
         $image = $this->projectService->addGalleryImage(
             $project,
             $request->file('image'),
+            $request->get('name'),
             (int) $request->get('sort_order', 0),
             $this->mediaService
         );
@@ -109,6 +110,7 @@ class ProjectController extends BaseApiController
         return $this->successResponse(
             [
                 'id' => $image->id,
+                'name' => $image->name,
                 'url' => MediaUrl::toUrl($image->path),
                 'sort_order' => $image->sort_order,
             ],
@@ -124,16 +126,21 @@ class ProjectController extends BaseApiController
             return $this->errorResponse([], 'غير موجود', 'Not found', 404);
         }
 
-        $image = $this->projectService->updateGalleryImage(
-            $image,
-            $request->file('image'),
-            $request->get('sort_order'),
-            $this->mediaService
-        );
+        $data = [];
+        if ($request->exists('name')) {
+            $data['name'] = $request->get('name');
+        }
+
+        if ($request->exists('sort_order')) {
+            $data['sort_order'] = (int) $request->get('sort_order');
+        }
+
+        $image = $this->projectService->updateGalleryImage($image, $request->file('image'), $data, $this->mediaService);
 
         return $this->successResponse(
             [
                 'id' => $image->id,
+                'name' => $image->name,
                 'url' => MediaUrl::toUrl($image->path),
                 'sort_order' => $image->sort_order,
             ],

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Api\V1\Admin\HomeHeroImageRequest;
+use App\Http\Requests\Api\V1\Admin\HomeHeroImageUpdateRequest;
 use App\Http\Requests\Api\V1\Admin\HomeUpdateRequest;
 use App\Http\Resources\V1\HomeResource;
 use App\Models\HomeImage;
@@ -49,6 +50,7 @@ class HomeController extends BaseApiController
         $image = $this->homeService->addHeroImage(
             $home,
             $request->file('image'),
+            $request->get('name'),
             (int) $request->get('sort_order', 0),
             $this->mediaService
         );
@@ -56,12 +58,43 @@ class HomeController extends BaseApiController
         return $this->successResponse(
             [
                 'id' => $image->id,
+                'name' => $image->name,
                 'url' => MediaUrl::toUrl($image->path),
                 'sort_order' => $image->sort_order,
             ],
             'تم إضافة الصورة بنجاح',
             'Image added successfully',
             201
+        );
+    }
+
+    public function updateHeroImage(HomeHeroImageUpdateRequest $request, HomeImage $image)
+    {
+        $data = [];
+        if ($request->exists('name')) {
+            $data['name'] = $request->get('name');
+        }
+
+        if ($request->exists('sort_order')) {
+            $data['sort_order'] = (int) $request->get('sort_order');
+        }
+
+        $image = $this->homeService->updateHeroImage(
+            $image,
+            $request->file('image'),
+            $data,
+            $this->mediaService
+        );
+
+        return $this->successResponse(
+            [
+                'id' => $image->id,
+                'name' => $image->name,
+                'url' => MediaUrl::toUrl($image->path),
+                'sort_order' => $image->sort_order,
+            ],
+            'ØªÙ… ØªØ­Ø¯ÙŠØ« Ø§Ù„ØµÙˆØ±Ø© Ø¨Ù†Ø¬Ø§Ø­',
+            'Image updated successfully'
         );
     }
 

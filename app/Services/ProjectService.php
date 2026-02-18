@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\ProjectImage;
 use App\Support\CacheVersion;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -18,7 +19,7 @@ class ProjectService
 
         if ($search !== '') {
             return Project::query()
-                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path'])
+                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
                 ->where(function ($query) use ($search) {
                     $query
                         ->where('name', 'like', "%{$search}%")
@@ -40,7 +41,7 @@ class ProjectService
 
         return Cache::remember($cacheKey, 3600, function () use ($perPage, $page) {
             return Project::query()
-                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path'])
+                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $page);
         });
@@ -61,8 +62,9 @@ class ProjectService
                 'location_ar',
                 'location_en',
                 'cover_path',
+                'is_featured_home',
             ])
-            ->with(['images:id,project_id,path,sort_order'])
+            ->with(['images:id,project_id,name,path,sort_order'])
             ->findOrFail($id);
     }
 
@@ -105,10 +107,17 @@ class ProjectService
         CacheVersion::bump('projects');
     }
 
-    public function addGalleryImage(Project $project, UploadedFile $file, int $sortOrder, MediaService $media): ProjectImage
+    public function addGalleryImage(
+        Project $project,
+        UploadedFile $file,
+        ?string $name,
+        int $sortOrder,
+        MediaService $media
+    ): ProjectImage
     {
         $path = $media->store($file, 'projects/galleries');
         $image = $project->images()->create([
+            'name' => $name,
             'path' => $path,
             'sort_order' => $sortOrder,
         ]);
@@ -118,23 +127,40 @@ class ProjectService
         return $image;
     }
 
-    public function updateGalleryImage(ProjectImage $image, ?UploadedFile $file, ?int $sortOrder, MediaService $media): ProjectImage
-    {
-        $data = [];
+    public function updateGalleryImage(
+        ProjectImage $image,
+        ?UploadedFile $file,
+        ?array $data,
+        MediaService $media
+    ): ProjectImage {
+        $updates = $data ?? [];
+
         if ($file) {
-            $data['path'] = $media->update($file, 'projects/galleries', $image->path);
+            $updates['path'] = $media->update($file, 'projects/galleries', $image->path);
         }
 
-        if ($sortOrder !== null) {
-            $data['sort_order'] = $sortOrder;
-        }
-
-        if ($data) {
-            $image->update($data);
+        if ($updates !== []) {
+            $image->update($updates);
             CacheVersion::bump('projects');
         }
 
         return $image;
+    }
+
+    public function featuredForHome(int $limit = 8): Collection
+    {
+        $limit = max(1, min($limit, 30));
+        $version = CacheVersion::get('projects');
+        $cacheKey = "public:home:featured-projects:v{$version}:l{$limit}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($limit) {
+            return Project::query()
+                ->select(['id', 'name', 'name_ar', 'name_en', 'location', 'location_ar', 'location_en', 'cover_path', 'is_featured_home'])
+                ->where('is_featured_home', true)
+                ->orderByDesc('updated_at')
+                ->limit($limit)
+                ->get();
+        });
     }
 
     public function deleteGalleryImage(ProjectImage $image, MediaService $media): void

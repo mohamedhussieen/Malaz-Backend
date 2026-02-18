@@ -16,6 +16,14 @@ class HomeResource extends JsonResource
             'headline_text' => $this->localized('headline_text'),
             'body_text' => $this->localized('body_text'),
             'youtube_url' => $this->youtube_url,
+            'hero_gallery' => $this->images
+                ? $this->images->map(fn ($image) => [
+                    'id' => $image->id,
+                    'name' => $image->name,
+                    'sort_order' => $image->sort_order,
+                    'url' => MediaUrl::toUrl($image->path),
+                ])->values()->all()
+                : [],
             'hero_gallery_urls' => $this->images
                 ? $this->images->map(fn ($image) => MediaUrl::toUrl($image->path))->values()->all()
                 : [],

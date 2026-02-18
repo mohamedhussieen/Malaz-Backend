@@ -17,6 +17,7 @@ class ProjectListResource extends JsonResource
             'name' => $this->localized('name'),
             'location' => $this->localized('location'),
             'cover_url' => MediaUrl::toUrl($this->cover_path),
+            'is_featured_home' => (bool) $this->is_featured_home,
         ];
     }
 }

@@ -17,7 +17,7 @@ class HomeService
 
         return Cache::remember($cacheKey, 3600, function () {
             $home = HomeContent::query()
-                ->with(['images:id,home_content_id,path,sort_order'])
+                ->with(['images:id,home_content_id,name,path,sort_order'])
                 ->first();
 
             if (!$home) {
@@ -30,7 +30,7 @@ class HomeService
                     'body_text_en' => '',
                 ]);
 
-                $home->load(['images:id,home_content_id,path,sort_order']);
+                $home->load(['images:id,home_content_id,name,path,sort_order']);
             }
 
             return $home;
@@ -46,15 +46,32 @@ class HomeService
         return $home;
     }
 
-    public function addHeroImage(HomeContent $home, UploadedFile $file, int $sortOrder, MediaService $media): HomeImage
+    public function addHeroImage(HomeContent $home, UploadedFile $file, ?string $name, int $sortOrder, MediaService $media): HomeImage
     {
         $path = $media->store($file, 'home/hero_gallery');
         $image = $home->images()->create([
+            'name' => $name,
             'path' => $path,
             'sort_order' => $sortOrder,
         ]);
 
         CacheVersion::bump('home');
+
+        return $image;
+    }
+
+    public function updateHeroImage(HomeImage $image, ?UploadedFile $file, ?array $data, MediaService $media): HomeImage
+    {
+        $updates = $data ?? [];
+
+        if ($file) {
+            $updates['path'] = $media->update($file, 'home/hero_gallery', $image->path);
+        }
+
+        if ($updates !== []) {
+            $image->update($updates);
+            CacheVersion::bump('home');
+        }
 
         return $image;
     }

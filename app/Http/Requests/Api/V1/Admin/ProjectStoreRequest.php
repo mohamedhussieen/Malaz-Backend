@@ -15,6 +15,7 @@ class ProjectStoreRequest extends ApiFormRequest
             'description_en' => ['required', 'string'],
             'location_ar' => ['required', 'string', 'max:255'],
             'location_en' => ['required', 'string', 'max:255'],
+            'is_featured_home' => ['nullable', 'boolean'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }

@@ -18,6 +18,11 @@ class Project extends Model
         'location_ar',
         'location_en',
         'cover_path',
+        'is_featured_home',
+    ];
+
+    protected $casts = [
+        'is_featured_home' => 'boolean',
     ];
 
     public function images(): HasMany
