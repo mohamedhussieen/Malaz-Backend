@@ -9,6 +9,7 @@ class PlatformLinkResource extends JsonResource
     public function toArray($request): array
     {
         return [
+            'id' => $this->id,
             'key' => $this->key,
             'url' => $this->url,
             'is_active' => (bool) $this->is_active,
