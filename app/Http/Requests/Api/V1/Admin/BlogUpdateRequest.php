@@ -8,6 +8,30 @@ use Illuminate\Validation\Rule;
 
 class BlogUpdateRequest extends ApiFormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if (!$this->exists('is_published')) {
+            return;
+        }
+
+        $this->merge([
+            'is_published' => $this->normalizeBooleanInput($this->input('is_published')),
+        ]);
+    }
+
+    private function normalizeBooleanInput(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        return match (strtolower(trim($value))) {
+            'true', '1', 'on', 'yes' => true,
+            'false', '0', 'off', 'no' => false,
+            default => $value,
+        };
+    }
+
     public function rules(): array
     {
         /** @var Blog|null $blog */

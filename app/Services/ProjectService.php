@@ -16,11 +16,12 @@ class ProjectService
     private ?array $projectColumns = null;
     private ?array $projectImageColumns = null;
 
-    public function paginate(int $perPage, int $page, ?string $search = null): LengthAwarePaginator
+    public function paginate(int $perPage, int $page, ?string $search = null, ?bool $featured = null): LengthAwarePaginator
     {
         $perPage = min($perPage, 50);
         $search = is_string($search) ? trim($search) : '';
         $selectColumns = $this->projectListSelectColumns();
+        $canFilterByFeatured = $featured !== null && $this->hasProjectColumn('is_featured_home');
         $searchColumns = $this->availableProjectColumns([
             'name',
             'name_ar',
@@ -33,7 +34,7 @@ class ProjectService
             'description_en',
         ]);
 
-        if ($search !== '') {
+        if ($search !== '' || $canFilterByFeatured) {
             $query = Project::query()->select($selectColumns);
 
             if ($searchColumns !== []) {
@@ -49,19 +50,29 @@ class ProjectService
                 });
             }
 
+            if ($canFilterByFeatured) {
+                $query->where('is_featured_home', $featured);
+            }
+
             return $query
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $page);
         }
 
         $version = CacheVersion::get('projects');
-        $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}";
+        $featuredKey = $featured === null ? 'all' : ($featured ? 'featured1' : 'featured0');
+        $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}:{$featuredKey}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns) {
-            return Project::query()
+        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns, $canFilterByFeatured, $featured) {
+            $query = Project::query()
                 ->select($selectColumns)
-                ->orderByDesc('created_at')
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->orderByDesc('created_at');
+
+            if ($canFilterByFeatured) {
+                $query->where('is_featured_home', $featured);
+            }
+
+            return $query->paginate($perPage, ['*'], 'page', $page);
         });
     }
 

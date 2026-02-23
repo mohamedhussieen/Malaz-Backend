@@ -6,6 +6,30 @@ use App\Http\Requests\Api\V1\ApiFormRequest;
 
 class ProjectStoreRequest extends ApiFormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if (!$this->exists('is_featured_home')) {
+            return;
+        }
+
+        $this->merge([
+            'is_featured_home' => $this->normalizeBooleanInput($this->input('is_featured_home')),
+        ]);
+    }
+
+    private function normalizeBooleanInput(mixed $value): mixed
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        return match (strtolower(trim($value))) {
+            'true', '1', 'on', 'yes' => true,
+            'false', '0', 'off', 'no' => false,
+            default => $value,
+        };
+    }
+
     public function rules(): array
     {
         return [

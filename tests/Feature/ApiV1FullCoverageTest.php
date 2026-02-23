@@ -65,10 +65,23 @@ class ApiV1FullCoverageTest extends TestCase
 
         $this->getJson('/api/v1/admin/owners?per_page=10&page=1', $headers)->assertOk()->assertJsonPath('status', true);
         $this->getJson("/api/v1/admin/owners/{$ownerId}", $headers)->assertOk()->assertJsonPath('status', true);
-        $this->putJson("/api/v1/admin/owners/{$ownerId}", [
+        $ownerUpdate = $this->post("/api/v1/admin/owners/{$ownerId}", [
+            '_method' => 'PUT',
             'name_ar' => 'Owner Ar Updated',
             'name_en' => 'Owner En Updated',
-        ], $headers)->assertOk()->assertJsonPath('status', true);
+            'title_ar' => 'Title Ar Updated',
+            'title_en' => 'Title En Updated',
+            'bio_ar' => 'Bio Ar Updated',
+            'bio_en' => 'Bio En Updated',
+            'avatar' => UploadedFile::fake()->image('owner-updated.jpg'),
+        ], $headers);
+        $ownerUpdate->assertOk();
+        $ownerUpdate->assertJsonPath('status', true);
+        $this->assertDatabaseHas('owners', [
+            'id' => $ownerId,
+            'name_en' => 'Owner En Updated',
+            'title_en' => 'Title En Updated',
+        ]);
 
         $projectCreate = $this->post('/api/v1/admin/projects', [
             'name_ar' => 'Project Ar',
@@ -87,6 +100,26 @@ class ApiV1FullCoverageTest extends TestCase
         $this->getJson('/api/v1/admin/projects?per_page=10&page=1', $headers)->assertOk()->assertJsonPath('status', true);
         $this->getJson("/api/v1/admin/projects/{$projectId}", $headers)->assertOk()->assertJsonPath('status', true);
         $this->getJson("/api/v1/projects/{$projectId}")->assertOk()->assertJsonPath('status', true);
+        $projectUpdate = $this->post("/api/v1/admin/projects/{$projectId}", [
+            '_method' => 'PUT',
+            'name_ar' => 'Project Ar Updated',
+            'name_en' => 'Project En Updated',
+            'description_ar' => 'Description Ar Updated',
+            'description_en' => 'Description En Updated',
+            'location_ar' => 'Jeddah Ar',
+            'location_en' => 'Jeddah En',
+            'is_featured_home' => 'true',
+            'cover' => UploadedFile::fake()->image('project-cover-updated.jpg'),
+        ], $headers);
+        $projectUpdate->assertOk();
+        $projectUpdate->assertJsonPath('status', true);
+        $projectUpdate->assertJsonPath('data.is_featured_home', true);
+        $this->assertDatabaseHas('projects', [
+            'id' => $projectId,
+            'name_en' => 'Project En Updated',
+            'location_en' => 'Jeddah En',
+            'is_featured_home' => 1,
+        ]);
 
         $projectGalleryAdd = $this->post("/api/v1/admin/projects/{$projectId}/gallery", [
             'image' => UploadedFile::fake()->image('gallery.jpg'),
@@ -97,12 +130,18 @@ class ApiV1FullCoverageTest extends TestCase
         $projectGalleryAdd->assertJsonPath('status', true);
         $projectImageId = (int) $projectGalleryAdd->json('data.id');
 
-        $projectGalleryUpdate = $this->patch("/api/v1/admin/projects/{$projectId}/gallery/{$projectImageId}", [
+        $projectGalleryUpdate = $this->post("/api/v1/admin/projects/{$projectId}/gallery/{$projectImageId}", [
+            '_method' => 'PATCH',
             'name' => 'Main render updated',
             'sort_order' => 2,
         ], $headers);
         $projectGalleryUpdate->assertOk();
         $projectGalleryUpdate->assertJsonPath('status', true);
+        $this->assertDatabaseHas('project_images', [
+            'id' => $projectImageId,
+            'name' => 'Main render updated',
+            'sort_order' => 2,
+        ]);
 
         $blogCreate = $this->post('/api/v1/admin/blogs', [
             'title_ar' => 'Blog Ar',
@@ -131,10 +170,16 @@ class ApiV1FullCoverageTest extends TestCase
         $this->getJson('/api/v1/admin/blogs?per_page=10&page=1', $headers)->assertOk()->assertJsonPath('status', true);
         $this->getJson("/api/v1/admin/blogs/{$blogId}", $headers)->assertOk()->assertJsonPath('status', true);
 
-        $this->putJson("/api/v1/admin/blogs/{$blogId}", [
+        $blogUpdate = $this->post("/api/v1/admin/blogs/{$blogId}", [
+            '_method' => 'PUT',
             'title_ar' => 'Blog Ar Updated',
             'title_en' => 'Blog En Updated',
-            'is_published' => true,
+            'excerpt_ar' => 'Updated excerpt ar',
+            'excerpt_en' => 'Updated excerpt en',
+            'content_ar' => 'Updated content ar',
+            'content_en' => 'Updated content en',
+            'is_published' => 'true',
+            'cover' => UploadedFile::fake()->image('blog-cover-updated.jpg'),
             'paragraphs' => [
                 [
                     'header_ar' => 'Section Ar',
@@ -144,7 +189,15 @@ class ApiV1FullCoverageTest extends TestCase
                     'sort_order' => 1,
                 ],
             ],
-        ], $headers)->assertOk()->assertJsonPath('status', true);
+        ], $headers);
+        $blogUpdate->assertOk();
+        $blogUpdate->assertJsonPath('status', true);
+        $blogUpdate->assertJsonPath('data.is_published', true);
+        $this->assertDatabaseHas('blogs', [
+            'id' => $blogId,
+            'title_en' => 'Blog En Updated',
+            'is_published' => 1,
+        ]);
 
         $this->getJson("/api/v1/blogs/{$blogSlug}")->assertOk()->assertJsonPath('status', true);
 
@@ -166,10 +219,17 @@ class ApiV1FullCoverageTest extends TestCase
         $homeHeroAdd->assertJsonPath('status', true);
         $homeImageId = (int) $homeHeroAdd->json('data.id');
 
-        $this->patch("/api/v1/admin/home/hero-gallery/{$homeImageId}", [
+        $homeHeroUpdate = $this->post("/api/v1/admin/home/hero-gallery/{$homeImageId}", [
+            '_method' => 'PATCH',
             'name' => 'Skyline Hero Updated',
             'sort_order' => 2,
-        ], $headers)->assertOk()->assertJsonPath('status', true);
+        ], $headers);
+        $homeHeroUpdate->assertOk()->assertJsonPath('status', true);
+        $this->assertDatabaseHas('home_images', [
+            'id' => $homeImageId,
+            'name' => 'Skyline Hero Updated',
+            'sort_order' => 2,
+        ]);
 
         $platformUpsert = $this->putJson('/api/v1/admin/platform-links/facebook', [
             'url' => 'https://facebook.com/malaz',

@@ -457,7 +457,7 @@
         {
           "name": "Admin Owner Update",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -472,6 +472,11 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                {
+                  "key": "_method",
+                  "type": "text",
+                  "value": "PUT"
+                },
                 {
                   "key": "name_ar",
                   "type": "text",
@@ -646,7 +651,7 @@
         {
           "name": "Admin Project Update",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -661,6 +666,11 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                {
+                  "key": "_method",
+                  "type": "text",
+                  "value": "PUT"
+                },
                 {
                   "key": "name_ar",
                   "type": "text",
@@ -757,7 +767,7 @@
         {
           "name": "Admin Project Gallery Update",
           "request": {
-            "method": "PATCH",
+            "method": "POST",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -771,6 +781,11 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                {
+                  "key": "_method",
+                  "type": "text",
+                  "value": "PATCH"
+                },
                 {
                   "key": "name",
                   "type": "text",
@@ -996,7 +1011,7 @@
         {
           "name": "Admin Blog Update",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1011,6 +1026,11 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                {
+                  "key": "_method",
+                  "type": "text",
+                  "value": "PUT"
+                },
                 {
                   "key": "title_ar",
                   "type": "text",
@@ -1199,7 +1219,7 @@
         {
           "name": "Admin Home Hero Update",
           "request": {
-            "method": "PATCH",
+            "method": "POST",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1213,6 +1233,11 @@
             "body": {
               "mode": "formdata",
               "formdata": [
+                {
+                  "key": "_method",
+                  "type": "text",
+                  "value": "PATCH"
+                },
                 {
                   "key": "name",
                   "type": "text",
