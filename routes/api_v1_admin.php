@@ -27,6 +27,8 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/home', [HomeController::class, 'show']);
         Route::put('/home', [HomeController::class, 'update']);
+        Route::post('/home/hero-background', [HomeController::class, 'storeHeroBackground']);
+        Route::post('/home/hero-post', [HomeController::class, 'storeHeroPost']);
         Route::post('/home/hero-gallery', [HomeController::class, 'storeHeroImage']);
         Route::patch('/home/hero-gallery/{image}', [HomeController::class, 'updateHeroImage']);
         Route::delete('/home/hero-gallery/{image}', [HomeController::class, 'destroyHeroImage']);

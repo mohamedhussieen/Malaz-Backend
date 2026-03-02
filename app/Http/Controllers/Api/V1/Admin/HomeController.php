@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Api\V1\Admin\HomeHeroBackgroundRequest;
 use App\Http\Requests\Api\V1\Admin\HomeHeroImageRequest;
 use App\Http\Requests\Api\V1\Admin\HomeHeroImageUpdateRequest;
+use App\Http\Requests\Api\V1\Admin\HomeHeroPostRequest;
 use App\Http\Requests\Api\V1\Admin\HomeUpdateRequest;
 use App\Http\Resources\V1\HomeResource;
 use App\Models\HomeImage;
@@ -41,6 +43,34 @@ class HomeController extends BaseApiController
             (new HomeResource($home))->resolve(),
             'تم تحديث البيانات بنجاح',
             'Updated successfully'
+        );
+    }
+
+    public function storeHeroBackground(HomeHeroBackgroundRequest $request)
+    {
+        $home = $this->homeService->get();
+        $home = $this->homeService->updateHeroBackground($home, $request->file('image'), $this->mediaService);
+
+        return $this->successResponse(
+            [
+                'hero_background' => MediaUrl::toUrl($home->hero_background_path),
+            ],
+            'تم تحديث خلفية الهيرو بنجاح',
+            'Hero background updated successfully'
+        );
+    }
+
+    public function storeHeroPost(HomeHeroPostRequest $request)
+    {
+        $home = $this->homeService->get();
+        $home = $this->homeService->updateHeroPost($home, $request->file('image'), $this->mediaService);
+
+        return $this->successResponse(
+            [
+                'hero_post' => MediaUrl::toUrl($home->hero_post_path),
+            ],
+            'تم تحديث صورة الهيرو بنجاح',
+            'Hero post updated successfully'
         );
     }
 

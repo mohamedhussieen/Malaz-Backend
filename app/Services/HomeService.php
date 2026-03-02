@@ -51,6 +51,34 @@ class HomeService
         return $home;
     }
 
+    public function updateHeroBackground(HomeContent $home, UploadedFile $file, MediaService $media): HomeContent
+    {
+        $updates = $this->filterDataByHomeContentColumns([
+            'hero_background_path' => $media->update($file, 'home/hero_background', $home->hero_background_path),
+        ]);
+
+        if ($updates !== []) {
+            $home->update($updates);
+            CacheVersion::bump('home');
+        }
+
+        return $home->fresh();
+    }
+
+    public function updateHeroPost(HomeContent $home, UploadedFile $file, MediaService $media): HomeContent
+    {
+        $updates = $this->filterDataByHomeContentColumns([
+            'hero_post_path' => $media->update($file, 'home/hero_post', $home->hero_post_path),
+        ]);
+
+        if ($updates !== []) {
+            $home->update($updates);
+            CacheVersion::bump('home');
+        }
+
+        return $home->fresh();
+    }
+
     public function addHeroImage(HomeContent $home, UploadedFile $file, ?string $name, int $sortOrder, MediaService $media): HomeImage
     {
         $path = $media->store($file, 'home/hero_gallery');

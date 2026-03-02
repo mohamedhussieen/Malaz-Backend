@@ -15,6 +15,8 @@ class HomeContent extends Model
         'body_text_ar',
         'body_text_en',
         'youtube_url',
+        'hero_background_path',
+        'hero_post_path',
     ];
 
     public function images(): HasMany
