@@ -35,7 +35,9 @@ class ProjectService
         ]);
 
         if ($search !== '' || $canFilterByFeatured) {
-            $query = Project::query()->select($selectColumns);
+            $query = Project::query()
+                ->select($selectColumns)
+                ->with(['images:id,project_id,name,path,sort_order']);
 
             if ($searchColumns !== []) {
                 $query->where(function ($builder) use ($search, $searchColumns) {
@@ -66,6 +68,7 @@ class ProjectService
         return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns, $canFilterByFeatured, $featured) {
             $query = Project::query()
                 ->select($selectColumns)
+                ->with(['images:id,project_id,name,path,sort_order'])
                 ->orderByDesc('created_at');
 
             if ($canFilterByFeatured) {
@@ -91,6 +94,14 @@ class ProjectService
             'location_en',
             'cover_path',
             'is_featured_home',
+            'price',
+            'status',
+            'valuation',
+            'yield',
+            'property_type',
+            'year_built',
+            'area_sqft',
+            'features',
         ]);
 
         return Project::query()
@@ -196,6 +207,7 @@ class ProjectService
         return Cache::remember($cacheKey, 3600, function () use ($limit, $selectColumns) {
             return Project::query()
                 ->select($selectColumns)
+                ->with(['images:id,project_id,name,path,sort_order'])
                 ->where('is_featured_home', true)
                 ->orderByDesc('updated_at')
                 ->limit($limit)
@@ -239,6 +251,14 @@ class ProjectService
             'location_en',
             'cover_path',
             'is_featured_home',
+            'price',
+            'status',
+            'valuation',
+            'yield',
+            'property_type',
+            'year_built',
+            'area_sqft',
+            'features',
         ]);
     }
 

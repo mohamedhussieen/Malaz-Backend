@@ -19,10 +19,25 @@ class Project extends Model
         'location_en',
         'cover_path',
         'is_featured_home',
+        'price',
+        'status',
+        'valuation',
+        'yield',
+        'property_type',
+        'year_built',
+        'area_sqft',
+        'features',
     ];
 
     protected $casts = [
         'is_featured_home' => 'boolean',
+        'price' => 'integer',
+        'valuation' => 'integer',
+        'yield' => 'float',
+        'property_type' => 'array',
+        'year_built' => 'integer',
+        'area_sqft' => 'integer',
+        'features' => 'array',
     ];
 
     public function images(): HasMany

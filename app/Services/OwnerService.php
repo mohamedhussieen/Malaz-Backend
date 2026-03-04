@@ -64,6 +64,30 @@ class OwnerService
         });
     }
 
+    public function find(int $id): Owner
+    {
+        $version = CacheVersion::get('owners');
+        $cacheKey = "public:owners:v{$version}:id{$id}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($id) {
+            return Owner::query()
+                ->select([
+                    'id',
+                    'name',
+                    'name_ar',
+                    'name_en',
+                    'title',
+                    'title_ar',
+                    'title_en',
+                    'bio',
+                    'bio_ar',
+                    'bio_en',
+                    'avatar_path',
+                ])
+                ->findOrFail($id);
+        });
+    }
+
     public function create(array $data, ?UploadedFile $avatar, MediaService $media): Owner
     {
         $data = $this->hydrateLegacyFields($data);

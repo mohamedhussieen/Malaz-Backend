@@ -65,6 +65,7 @@ class ApiV1FullCoverageTest extends TestCase
 
         $this->getJson('/api/v1/admin/owners?per_page=10&page=1', $headers)->assertOk()->assertJsonPath('status', true);
         $this->getJson("/api/v1/admin/owners/{$ownerId}", $headers)->assertOk()->assertJsonPath('status', true);
+        $this->getJson("/api/v1/owners/{$ownerId}")->assertOk()->assertJsonPath('status', true);
         $ownerUpdate = $this->post("/api/v1/admin/owners/{$ownerId}", [
             '_method' => 'PUT',
             'name_ar' => 'Owner Ar Updated',

@@ -24,7 +24,18 @@ class OwnerController extends BaseApiController
 
         return $this->successResponse(
             $this->paginationPayload($paginator, $items),
-            'تم الحصول على البيانات بنجاح',
+            '?? ?????? ??? ???????? ?????',
+            'Data fetched successfully'
+        );
+    }
+
+    public function show(int $owner)
+    {
+        $ownerModel = $this->ownerService->find($owner);
+
+        return $this->successResponse(
+            (new OwnerResource($ownerModel))->resolve(),
+            '?? ?????? ??? ???????? ?????',
             'Data fetched successfully'
         );
     }

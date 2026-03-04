@@ -15,6 +15,7 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::get('/dashboard/counts', [DashboardController::class, 'counts']);
 

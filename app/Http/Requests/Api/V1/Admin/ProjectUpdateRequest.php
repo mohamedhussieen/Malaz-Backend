@@ -40,6 +40,16 @@ class ProjectUpdateRequest extends ApiFormRequest
             'location_ar' => ['sometimes', 'required', 'string', 'max:255'],
             'location_en' => ['sometimes', 'required', 'string', 'max:255'],
             'is_featured_home' => ['sometimes', 'boolean'],
+            'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'status' => ['sometimes', 'nullable', 'string', 'in:active,inactive,sold,draft'],
+            'valuation' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'yield' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'property_type' => ['sometimes', 'nullable', 'array'],
+            'property_type.*' => ['string', 'max:100'],
+            'year_built' => ['sometimes', 'nullable', 'integer', 'between:1900,2100'],
+            'area_sqft' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'features' => ['sometimes', 'nullable', 'array'],
+            'features.*' => ['string', 'max:255'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }

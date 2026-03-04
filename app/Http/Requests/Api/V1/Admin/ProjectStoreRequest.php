@@ -40,6 +40,16 @@ class ProjectStoreRequest extends ApiFormRequest
             'location_ar' => ['required', 'string', 'max:255'],
             'location_en' => ['required', 'string', 'max:255'],
             'is_featured_home' => ['nullable', 'boolean'],
+            'price' => ['nullable', 'integer', 'min:0'],
+            'status' => ['nullable', 'string', 'in:active,inactive,sold,draft'],
+            'valuation' => ['nullable', 'integer', 'min:0'],
+            'yield' => ['nullable', 'numeric', 'min:0'],
+            'property_type' => ['nullable', 'array'],
+            'property_type.*' => ['string', 'max:100'],
+            'year_built' => ['nullable', 'integer', 'between:1900,2100'],
+            'area_sqft' => ['nullable', 'integer', 'min:0'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['string', 'max:255'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }

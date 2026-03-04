@@ -128,7 +128,7 @@ class ProjectController extends BaseApiController
 
     public function updateGallery(ProjectGalleryUpdateRequest $request, Project $project, ProjectImage $image)
     {
-        if ($image->project_id !== $project->id) {
+        if ((int) $image->project_id !== (int) $project->id) {
             return $this->errorResponse([], 'غير موجود', 'Not found', 404);
         }
 
@@ -157,7 +157,7 @@ class ProjectController extends BaseApiController
 
     public function destroyGallery(Project $project, ProjectImage $image)
     {
-        if ($image->project_id !== $project->id) {
+        if ((int) $image->project_id !== (int) $project->id) {
             return $this->errorResponse([], 'غير موجود', 'Not found', 404);
         }
 

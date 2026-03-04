@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Api\V1\Admin\AdminChangePasswordRequest;
 use App\Http\Requests\Api\V1\Admin\AdminLoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -63,6 +64,19 @@ class AuthController extends BaseApiController
             ],
             'تم الحصول على البيانات بنجاح',
             'Data fetched successfully'
+        );
+    }
+
+    public function changePassword(AdminChangePasswordRequest $request)
+    {
+        $user = $request->user();
+        $user->password = $request->new_password;
+        $user->save();
+
+        return $this->successResponse(
+            null,
+            'تم تغيير كلمة المرور بنجاح',
+            'Password changed successfully'
         );
     }
 }

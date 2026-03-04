@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/owners', [OwnerController::class, 'index']);
+Route::get('/owners/{owner}', [OwnerController::class, 'show']);
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);
 Route::get('/blogs', [BlogController::class, 'index']);
