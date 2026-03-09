@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
@@ -18,6 +19,14 @@ class Project extends Model
         'location_ar',
         'location_en',
         'cover_path',
+        'owner_id',
+        'owner_name',
+        'owner_name_ar',
+        'owner_name_en',
+        'owner_title',
+        'owner_title_ar',
+        'owner_title_en',
+        'owner_avatar_url',
         'is_featured_home',
         'price',
         'status',
@@ -26,10 +35,17 @@ class Project extends Model
         'property_type',
         'year_built',
         'area_sqft',
+        'min_investment',
+        'target_fund',
+        'funded_amount',
+        'cap_rate',
+        'cash_on_cash',
+        'irr',
         'features',
     ];
 
     protected $casts = [
+        'owner_id' => 'integer',
         'is_featured_home' => 'boolean',
         'price' => 'integer',
         'valuation' => 'integer',
@@ -37,8 +53,19 @@ class Project extends Model
         'property_type' => 'array',
         'year_built' => 'integer',
         'area_sqft' => 'integer',
+        'min_investment' => 'integer',
+        'target_fund' => 'integer',
+        'funded_amount' => 'integer',
+        'cap_rate' => 'float',
+        'cash_on_cash' => 'float',
+        'irr' => 'float',
         'features' => 'array',
     ];
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class);
+    }
 
     public function images(): HasMany
     {

@@ -37,7 +37,7 @@ class ProjectService
         if ($search !== '' || $canFilterByFeatured) {
             $query = Project::query()
                 ->select($selectColumns)
-                ->with(['images:id,project_id,name,path,sort_order']);
+                ->with($this->projectPublicRelations());
 
             if ($searchColumns !== []) {
                 $query->where(function ($builder) use ($search, $searchColumns) {
@@ -68,7 +68,7 @@ class ProjectService
         return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns, $canFilterByFeatured, $featured) {
             $query = Project::query()
                 ->select($selectColumns)
-                ->with(['images:id,project_id,name,path,sort_order'])
+                ->with($this->projectPublicRelations())
                 ->orderByDesc('created_at');
 
             if ($canFilterByFeatured) {
@@ -93,6 +93,14 @@ class ProjectService
             'location_ar',
             'location_en',
             'cover_path',
+            'owner_id',
+            'owner_name',
+            'owner_name_ar',
+            'owner_name_en',
+            'owner_title',
+            'owner_title_ar',
+            'owner_title_en',
+            'owner_avatar_url',
             'is_featured_home',
             'price',
             'status',
@@ -101,12 +109,18 @@ class ProjectService
             'property_type',
             'year_built',
             'area_sqft',
+            'min_investment',
+            'target_fund',
+            'funded_amount',
+            'cap_rate',
+            'cash_on_cash',
+            'irr',
             'features',
         ]);
 
         return Project::query()
             ->select($selectColumns)
-            ->with(['images:id,project_id,name,path,sort_order'])
+            ->with($this->projectPublicRelations())
             ->findOrFail($id);
     }
 
@@ -207,7 +221,7 @@ class ProjectService
         return Cache::remember($cacheKey, 3600, function () use ($limit, $selectColumns) {
             return Project::query()
                 ->select($selectColumns)
-                ->with(['images:id,project_id,name,path,sort_order'])
+                ->with($this->projectPublicRelations())
                 ->where('is_featured_home', true)
                 ->orderByDesc('updated_at')
                 ->limit($limit)
@@ -236,6 +250,14 @@ class ProjectService
             $data['location'] = $data['location_en'] ?? $data['location_ar'] ?? $data['location'] ?? '';
         }
 
+        if (isset($data['owner_name_ar']) || isset($data['owner_name_en'])) {
+            $data['owner_name'] = $data['owner_name_en'] ?? $data['owner_name_ar'] ?? $data['owner_name'] ?? '';
+        }
+
+        if (array_key_exists('owner_title_ar', $data) || array_key_exists('owner_title_en', $data)) {
+            $data['owner_title'] = $data['owner_title_en'] ?? $data['owner_title_ar'] ?? $data['owner_title'] ?? null;
+        }
+
         return $data;
     }
 
@@ -250,6 +272,14 @@ class ProjectService
             'location_ar',
             'location_en',
             'cover_path',
+            'owner_id',
+            'owner_name',
+            'owner_name_ar',
+            'owner_name_en',
+            'owner_title',
+            'owner_title_ar',
+            'owner_title_en',
+            'owner_avatar_url',
             'is_featured_home',
             'price',
             'status',
@@ -258,8 +288,21 @@ class ProjectService
             'property_type',
             'year_built',
             'area_sqft',
+            'min_investment',
+            'target_fund',
+            'funded_amount',
+            'cap_rate',
+            'cash_on_cash',
+            'irr',
             'features',
         ]);
+    }
+
+    private function projectPublicRelations(): array
+    {
+        return [
+            'images:id,project_id,name,path,sort_order',
+        ];
     }
 
     private function availableProjectColumns(array $columns): array
