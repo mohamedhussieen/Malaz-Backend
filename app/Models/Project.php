@@ -28,6 +28,7 @@ class Project extends Model
         'owner_title_en',
         'owner_avatar_url',
         'is_featured_home',
+        'project_hero_section',
         'price',
         'status',
         'valuation',
@@ -47,6 +48,7 @@ class Project extends Model
     protected $casts = [
         'owner_id' => 'integer',
         'is_featured_home' => 'boolean',
+        'project_hero_section' => 'boolean',
         'price' => 'integer',
         'valuation' => 'integer',
         'yield' => 'float',

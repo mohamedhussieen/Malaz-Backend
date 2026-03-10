@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ProjectService
@@ -16,12 +17,19 @@ class ProjectService
     private ?array $projectColumns = null;
     private ?array $projectImageColumns = null;
 
-    public function paginate(int $perPage, int $page, ?string $search = null, ?bool $featured = null): LengthAwarePaginator
+    public function paginate(
+        int $perPage,
+        int $page,
+        ?string $search = null,
+        ?bool $featured = null,
+        ?bool $heroSection = null
+    ): LengthAwarePaginator
     {
         $perPage = min($perPage, 50);
         $search = is_string($search) ? trim($search) : '';
         $selectColumns = $this->projectListSelectColumns();
         $canFilterByFeatured = $featured !== null && $this->hasProjectColumn('is_featured_home');
+        $canFilterByHeroSection = $heroSection !== null && $this->hasProjectColumn('project_hero_section');
         $searchColumns = $this->availableProjectColumns([
             'name',
             'name_ar',
@@ -34,7 +42,7 @@ class ProjectService
             'description_en',
         ]);
 
-        if ($search !== '' || $canFilterByFeatured) {
+        if ($search !== '' || $canFilterByFeatured || $canFilterByHeroSection) {
             $query = Project::query()
                 ->select($selectColumns)
                 ->with($this->projectPublicRelations());
@@ -56,6 +64,10 @@ class ProjectService
                 $query->where('is_featured_home', $featured);
             }
 
+            if ($canFilterByHeroSection) {
+                $query->where('project_hero_section', $heroSection);
+            }
+
             return $query
                 ->orderByDesc('created_at')
                 ->paginate($perPage, ['*'], 'page', $page);
@@ -63,9 +75,10 @@ class ProjectService
 
         $version = CacheVersion::get('projects');
         $featuredKey = $featured === null ? 'all' : ($featured ? 'featured1' : 'featured0');
-        $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}:{$featuredKey}";
+        $heroSectionKey = $heroSection === null ? 'heroall' : ($heroSection ? 'hero1' : 'hero0');
+        $cacheKey = "public:projects:v{$version}:p{$page}:pp{$perPage}:{$featuredKey}:{$heroSectionKey}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns, $canFilterByFeatured, $featured) {
+        return Cache::remember($cacheKey, 3600, function () use ($perPage, $page, $selectColumns, $canFilterByFeatured, $featured, $canFilterByHeroSection, $heroSection) {
             $query = Project::query()
                 ->select($selectColumns)
                 ->with($this->projectPublicRelations())
@@ -73,6 +86,10 @@ class ProjectService
 
             if ($canFilterByFeatured) {
                 $query->where('is_featured_home', $featured);
+            }
+
+            if ($canFilterByHeroSection) {
+                $query->where('project_hero_section', $heroSection);
             }
 
             return $query->paginate($perPage, ['*'], 'page', $page);
@@ -102,6 +119,7 @@ class ProjectService
             'owner_title_en',
             'owner_avatar_url',
             'is_featured_home',
+            'project_hero_section',
             'price',
             'status',
             'valuation',
@@ -133,7 +151,15 @@ class ProjectService
         }
 
         $data = $this->filterDataByProjectColumns($data);
-        $project = Project::create($data);
+        $project = DB::transaction(function () use ($data) {
+            $project = Project::create($data);
+
+            if (($data['project_hero_section'] ?? false) === true) {
+                $this->clearHeroSectionFromOtherProjects($project->id);
+            }
+
+            return $project;
+        });
         CacheVersion::bump('projects');
 
         return $project;
@@ -148,7 +174,15 @@ class ProjectService
         }
 
         $data = $this->filterDataByProjectColumns($data);
-        $project->update($data);
+        $project = DB::transaction(function () use ($project, $data) {
+            $project->update($data);
+
+            if (($data['project_hero_section'] ?? false) === true) {
+                $this->clearHeroSectionFromOtherProjects($project->id);
+            }
+
+            return $project;
+        });
         CacheVersion::bump('projects');
 
         return $project;
@@ -281,6 +315,7 @@ class ProjectService
             'owner_title_en',
             'owner_avatar_url',
             'is_featured_home',
+            'project_hero_section',
             'price',
             'status',
             'valuation',
@@ -303,6 +338,18 @@ class ProjectService
         return [
             'images:id,project_id,name,path,sort_order',
         ];
+    }
+
+    private function clearHeroSectionFromOtherProjects(int $projectId): void
+    {
+        if (!$this->hasProjectColumn('project_hero_section')) {
+            return;
+        }
+
+        Project::query()
+            ->where('project_hero_section', true)
+            ->whereKeyNot($projectId)
+            ->update(['project_hero_section' => false]);
     }
 
     private function availableProjectColumns(array $columns): array

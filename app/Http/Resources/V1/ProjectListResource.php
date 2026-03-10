@@ -36,6 +36,7 @@ class ProjectListResource extends JsonResource
                 'avatar_url' => $this->owner_avatar_url,
             ] : null,
             'is_featured_home' => (bool) $this->is_featured_home,
+            'project_hero_section' => (bool) $this->project_hero_section,
             'price' => $this->price !== null ? (int) $this->price : null,
             'status' => $this->status,
             'valuation' => $this->valuation !== null ? (int) $this->valuation : null,

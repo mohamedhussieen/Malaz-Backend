@@ -8,13 +8,15 @@ class ProjectUpdateRequest extends ApiFormRequest
 {
     protected function prepareForValidation(): void
     {
-        if (!$this->exists('is_featured_home')) {
-            return;
-        }
+        foreach (['is_featured_home', 'project_hero_section'] as $field) {
+            if (!$this->exists($field)) {
+                continue;
+            }
 
-        $this->merge([
-            'is_featured_home' => $this->normalizeBooleanInput($this->input('is_featured_home')),
-        ]);
+            $this->merge([
+                $field => $this->normalizeBooleanInput($this->input($field)),
+            ]);
+        }
     }
 
     private function normalizeBooleanInput(mixed $value): mixed
@@ -45,6 +47,7 @@ class ProjectUpdateRequest extends ApiFormRequest
             'owner_title_en' => ['sometimes', 'nullable', 'string', 'max:255'],
             'owner_avatar_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
             'is_featured_home' => ['sometimes', 'boolean'],
+            'project_hero_section' => ['sometimes', 'boolean'],
             'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'status' => ['sometimes', 'nullable', 'string', 'in:active,inactive,sold,draft'],
             'valuation' => ['sometimes', 'nullable', 'integer', 'min:0'],
