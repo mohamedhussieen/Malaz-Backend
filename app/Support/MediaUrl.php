@@ -10,6 +10,10 @@ class MediaUrl
             return null;
         }
 
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
         return url('/storage/'.ltrim($path, '/'));
     }
 }

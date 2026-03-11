@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('projects', function (Blueprint $table) {
             $table->unsignedBigInteger('price')->nullable()->after('is_featured_home');
-            $table->string('status', 50)->default('active')->after('price');
+            $table->string('status', 50)->default('available')->after('price');
             $table->unsignedBigInteger('valuation')->nullable()->after('status');
             $table->decimal('yield', 6, 2)->nullable()->after('valuation');
             $table->json('property_type')->nullable()->after('yield');

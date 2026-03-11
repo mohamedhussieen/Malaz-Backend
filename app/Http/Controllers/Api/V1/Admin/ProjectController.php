@@ -57,6 +57,7 @@ class ProjectController extends BaseApiController
         $project = $this->projectService->create(
             $request->validated(),
             $request->file('cover'),
+            $request->file('owner_avatar'),
             $this->mediaService
         );
 
@@ -85,6 +86,7 @@ class ProjectController extends BaseApiController
             $project,
             $request->validated(),
             $request->file('cover'),
+            $request->file('owner_avatar'),
             $this->mediaService
         );
 

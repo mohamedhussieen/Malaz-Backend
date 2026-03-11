@@ -142,12 +142,16 @@ class ProjectService
             ->findOrFail($id);
     }
 
-    public function create(array $data, ?UploadedFile $cover, MediaService $media): Project
+    public function create(array $data, ?UploadedFile $cover, ?UploadedFile $ownerAvatar, MediaService $media): Project
     {
         $data = $this->hydrateLegacyFields($data);
 
         if ($cover) {
             $data['cover_path'] = $media->store($cover, 'projects/covers');
+        }
+
+        if ($ownerAvatar) {
+            $data['owner_avatar_url'] = $media->store($ownerAvatar, 'projects/owner-avatars');
         }
 
         $data = $this->filterDataByProjectColumns($data);
@@ -165,12 +169,17 @@ class ProjectService
         return $project;
     }
 
-    public function update(Project $project, array $data, ?UploadedFile $cover, MediaService $media): Project
+    public function update(Project $project, array $data, ?UploadedFile $cover, ?UploadedFile $ownerAvatar, MediaService $media): Project
     {
         $data = $this->hydrateLegacyFields($data);
 
         if ($cover) {
             $data['cover_path'] = $media->update($cover, 'projects/covers', $project->cover_path);
+        }
+
+        if ($ownerAvatar) {
+            $oldOwnerAvatar = $this->isStoredMediaPath($project->owner_avatar_url) ? $project->owner_avatar_url : null;
+            $data['owner_avatar_url'] = $media->update($ownerAvatar, 'projects/owner-avatars', $oldOwnerAvatar);
         }
 
         $data = $this->filterDataByProjectColumns($data);
@@ -191,6 +200,9 @@ class ProjectService
     public function delete(Project $project, MediaService $media): void
     {
         $media->delete($project->cover_path);
+        if ($this->isStoredMediaPath($project->owner_avatar_url)) {
+            $media->delete($project->owner_avatar_url);
+        }
         foreach ($project->images as $image) {
             $media->delete($image->path);
         }
@@ -241,7 +253,7 @@ class ProjectService
         return $image;
     }
 
-    public function featuredForHome(int $limit = 8): Collection
+    public function featuredForHome(int $limit = 8, ?string $status = null): Collection
     {
         if (!$this->hasProjectColumn('is_featured_home')) {
             return new Collection();
@@ -249,15 +261,22 @@ class ProjectService
 
         $limit = max(1, min($limit, 30));
         $version = CacheVersion::get('projects');
-        $cacheKey = "public:home:featured-projects:v{$version}:l{$limit}";
+        $statusKey = $status ?? 'all';
+        $cacheKey = "public:home:featured-projects:v{$version}:l{$limit}:s{$statusKey}";
         $selectColumns = $this->projectListSelectColumns();
 
-        return Cache::remember($cacheKey, 3600, function () use ($limit, $selectColumns) {
-            return Project::query()
+        return Cache::remember($cacheKey, 3600, function () use ($limit, $selectColumns, $status) {
+            $query = Project::query()
                 ->select($selectColumns)
                 ->with($this->projectPublicRelations())
                 ->where('is_featured_home', true)
-                ->orderByDesc('updated_at')
+                ->orderByDesc('updated_at');
+
+            if ($status !== null && $this->hasProjectColumn('status')) {
+                $query->where('status', $status);
+            }
+
+            return $query
                 ->limit($limit)
                 ->get();
         });
@@ -405,5 +424,14 @@ class ProjectService
             static fn (mixed $value, string $key): bool => isset($columns[$key]),
             ARRAY_FILTER_USE_BOTH
         );
+    }
+
+    private function isStoredMediaPath(?string $path): bool
+    {
+        if (!$path) {
+            return false;
+        }
+
+        return !str_starts_with($path, 'http://') && !str_starts_with($path, 'https://');
     }
 }

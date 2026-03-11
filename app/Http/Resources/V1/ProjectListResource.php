@@ -33,7 +33,7 @@ class ProjectListResource extends JsonResource
                     : ($this->owner_title_en ?? $this->owner_title_ar ?? $this->owner_title),
                 'title_ar' => $this->owner_title_ar ?? $this->owner_title,
                 'title_en' => $this->owner_title_en ?? $this->owner_title,
-                'avatar_url' => $this->owner_avatar_url,
+                'avatar_url' => MediaUrl::toUrl($this->owner_avatar_url),
             ] : null,
             'is_featured_home' => (bool) $this->is_featured_home,
             'project_hero_section' => (bool) $this->project_hero_section,
