@@ -50,7 +50,7 @@ class ProjectUpdateRequest extends ApiFormRequest
             'is_featured_home' => ['sometimes', 'boolean'],
             'project_hero_section' => ['sometimes', 'boolean'],
             'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'status' => ['sometimes', 'nullable', 'string', 'in:available,not available,sold out'],
+            'status' => ['sometimes', 'nullable', 'string', 'in:available,not available,sold out,comming soon'],
             'valuation' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'yield' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'property_type' => ['sometimes', 'nullable', 'array'],
