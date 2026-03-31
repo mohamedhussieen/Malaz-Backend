@@ -52,7 +52,7 @@ class BlogUpdateRequest extends ApiFormRequest
                 'alpha_dash',
                 Rule::unique('blogs', 'slug')->ignore($blog?->id),
             ],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['sometimes', 'nullable', 'date'],
             'paragraphs' => ['sometimes', 'array', 'min:1'],

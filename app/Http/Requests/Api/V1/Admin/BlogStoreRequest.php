@@ -41,7 +41,7 @@ class BlogStoreRequest extends ApiFormRequest
             'content_ar' => ['nullable', 'string'],
             'content_en' => ['nullable', 'string'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash', Rule::unique('blogs', 'slug')],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
             'paragraphs' => ['sometimes', 'array', 'min:1'],

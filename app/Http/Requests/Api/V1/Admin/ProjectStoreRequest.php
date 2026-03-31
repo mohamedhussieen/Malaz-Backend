@@ -46,7 +46,7 @@ class ProjectStoreRequest extends ApiFormRequest
             'owner_title_ar' => ['nullable', 'string', 'max:255'],
             'owner_title_en' => ['nullable', 'string', 'max:255'],
             'owner_avatar_url' => ['nullable', 'string', 'max:2048'],
-            'owner_avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'owner_avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'is_featured_home' => ['nullable', 'boolean'],
             'project_hero_section' => ['nullable', 'boolean'],
             'price' => ['nullable', 'integer', 'min:0'],
@@ -65,7 +65,7 @@ class ProjectStoreRequest extends ApiFormRequest
             'irr' => ['nullable', 'numeric', 'min:0'],
             'features' => ['nullable', 'array'],
             'features.*' => ['string', 'max:255'],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ];
     }
 }
