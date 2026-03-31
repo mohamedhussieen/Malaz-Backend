@@ -15,7 +15,7 @@ class OwnerStoreRequest extends ApiFormRequest
             'title_en' => ['nullable', 'string', 'max:255'],
             'bio_ar' => ['nullable', 'string'],
             'bio_en' => ['nullable', 'string'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:10240'],
         ];
     }
 }

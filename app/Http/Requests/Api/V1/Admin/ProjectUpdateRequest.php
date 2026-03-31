@@ -46,7 +46,7 @@ class ProjectUpdateRequest extends ApiFormRequest
             'owner_title_ar' => ['sometimes', 'nullable', 'string', 'max:255'],
             'owner_title_en' => ['sometimes', 'nullable', 'string', 'max:255'],
             'owner_avatar_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
-            'owner_avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'owner_avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:10240'],
             'is_featured_home' => ['sometimes', 'boolean'],
             'project_hero_section' => ['sometimes', 'boolean'],
             'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
@@ -65,7 +65,7 @@ class ProjectUpdateRequest extends ApiFormRequest
             'irr' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'features' => ['sometimes', 'nullable', 'array'],
             'features.*' => ['string', 'max:255'],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:10240'],
         ];
     }
 }
