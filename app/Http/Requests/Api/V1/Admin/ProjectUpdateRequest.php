@@ -58,6 +58,8 @@ class ProjectUpdateRequest extends ApiFormRequest
             'year_built' => ['sometimes', 'nullable', 'integer', 'between:1900,2100'],
             'area_sqft' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'min_investment' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'down_payment_percentage' => ['sometimes', 'nullable', 'numeric', 'between:0,100'],
+            'years_of_installment' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'target_fund' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'funded_amount' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'cap_rate' => ['sometimes', 'nullable', 'numeric', 'min:0'],

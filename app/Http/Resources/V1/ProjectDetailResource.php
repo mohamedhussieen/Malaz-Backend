@@ -48,6 +48,8 @@ class ProjectDetailResource extends JsonResource
             'year_built' => $this->year_built !== null ? (int) $this->year_built : null,
             'area_sqft' => $this->area_sqft !== null ? (int) $this->area_sqft : null,
             'min_investment' => $this->min_investment !== null ? (int) $this->min_investment : null,
+            'down_payment_percentage' => $this->down_payment_percentage !== null ? (float) $this->down_payment_percentage : null,
+            'years_of_installment' => $this->years_of_installment !== null ? (int) $this->years_of_installment : null,
             'target_fund' => $this->target_fund !== null ? (int) $this->target_fund : null,
             'funded_amount' => $this->funded_amount !== null ? (int) $this->funded_amount : null,
             'cap_rate' => $this->cap_rate !== null ? (float) $this->cap_rate : null,

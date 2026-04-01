@@ -177,6 +177,8 @@ class DatabaseSeeder extends Seeder
                 'location_ar' => $locationAr,
                 'location_en' => $locationEn,
                 'cover_path' => "projects/covers/seed-project-{$i}.jpg",
+                'down_payment_percentage' => $faker->randomFloat(2, 0, 100),
+                'years_of_installment' => $faker->numberBetween(1, 15),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];

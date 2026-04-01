@@ -58,6 +58,8 @@ class ProjectStoreRequest extends ApiFormRequest
             'year_built' => ['nullable', 'integer', 'between:1900,2100'],
             'area_sqft' => ['nullable', 'integer', 'min:0'],
             'min_investment' => ['nullable', 'integer', 'min:0'],
+            'down_payment_percentage' => ['nullable', 'numeric', 'between:0,100'],
+            'years_of_installment' => ['nullable', 'integer', 'min:0'],
             'target_fund' => ['nullable', 'integer', 'min:0'],
             'funded_amount' => ['nullable', 'integer', 'min:0'],
             'cap_rate' => ['nullable', 'numeric', 'min:0'],
